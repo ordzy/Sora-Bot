@@ -21,7 +21,7 @@ module.exports = {
         const serverCount = bot.guilds.cache.size;
         const botVersion = '2.1.0'; // Update this if needed
         const discordJsVersion = require('discord.js').version;
-        const developer = 'Sora Team'; // Change this to your name or Discord tag
+        const developer = 'Sora Team'; 
 
         // Create embed
         const embed = new EmbedBuilder()
