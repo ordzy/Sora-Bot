@@ -14,7 +14,7 @@ Open Terminal/CMD in your Sora bot folder
 
 `node sora.js`
 
-Enter then boom yoou got it running!
+Enter then boom you got it running!
 
 # Important
 Make sure to change idclass role ids to your server roles in order to execute commands.
