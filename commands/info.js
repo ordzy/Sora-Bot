@@ -35,8 +35,8 @@ module.exports = {
                 { name: 'Hosted On', value: os.platform(), inline: true },
                 { name: 'Developer', value: developer, inline: true },
                 { 
-                    name: 'Open Source Coming Soon', 
-                    value: 'Sora will soon be open source! You will be able to submit pull requests to add new features.' 
+                    name: 'Sora Bot is Open Source!', 
+                    value: 'You will be able to submit pull requests to add new features. Github Link: https://github.com/bshar1865/Sora-Bot' 
                 }
             )
             .setColor('#ff9500')
