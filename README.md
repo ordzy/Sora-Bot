@@ -9,6 +9,8 @@ Node.JS from their Official Site
 
 `npm install dotenv`
 
+Rename example.env to .env
+
 # How To Run
 Open Terminal/CMD in your Sora bot folder 
 
