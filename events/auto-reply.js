@@ -6,6 +6,10 @@ module.exports = function (message) {
             trigger: ["subs don't work", "subs are not working", "SDW Sora"],
             reply: "You need to use the Sora player in Media Player for subtitles to work.<:KannaLove:1323338061517422662>"
         },
+       // {
+       //     trigger: ["subs don't work", "subs are not working", "SDW Sora"],
+      //      reply: "You need to use the Sora player in Media Player for subtitles to work.<:KannaLove:1323338061517422662>"
+       // },
        
         // Add more responses as needed
     ];
