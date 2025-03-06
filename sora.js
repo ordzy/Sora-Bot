@@ -26,6 +26,14 @@ for (const file of commandFiles) {
     commands.push(command.data.toJSON()); // Prepare commands for global registration
 }
 
+const autoReply = require('./events/auto-reply'); // Adjust path if needed
+
+client.on('messageCreate', async (message) => {
+    if (!message.author.bot) {
+        autoReply(message); // Calls the auto-reply system
+    }
+});
+
 // Register slash commands globally
 const rest = new REST({ version: '10' }).setToken(process.env.logintoken);
 
