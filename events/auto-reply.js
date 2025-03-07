@@ -3,7 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = function (message) {
     const responses = [
         {
-            trigger: ["subs don't work", "subs are not working", "SDW Sora"],
+            trigger: ["subs don't work", "subs are not working", "subs don’t work"],
             reply: "You need to use the Sora player in Media Player for subtitles to work.<:KannaLove:1323338061517422662>"
         },
        // {
