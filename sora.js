@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, REST, Routes, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, Collection, ActivityType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config(); // Load environment variables
@@ -55,6 +55,14 @@ const rest = new REST({ version: '10' }).setToken(process.env.logintoken);
 // Event: Bot ready
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
+    
+    client.user.setPresence({
+            status: 'online',
+            activities: [{
+                name: 'Anime on Sora',
+                type: ActivityType.Watching,
+            }],
+        });
 });
 
 // Event: Handle interaction (commands)
