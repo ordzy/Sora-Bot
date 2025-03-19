@@ -10,9 +10,9 @@ module.exports = {
         // Define app details
         const appDetails = {
             title: 'Sora Modules',
-            description: 'Easily add and manage modules for Sora, both automatically and manually. Special thanks to Ordzy for their support!',
+            description: 'Easily add and manage modules for Sora, both automatically and manually. Special thanks to cufiy for their support!',
             icon: 'https://cdn.discordapp.com/attachments/1318240587886891029/1324041711995060274/afbeelding.png?ex=679e426f&is=679cf0ef&hm=c67bde9bbf7f1619965aa7706f7a60e400f234af58c23c07711da1d4c18f11e3&', // Replace with your app icon URL
-            githubLink: 'https://sora-modules.pages.dev/',
+            githubLink: 'https://sora.jm26.net/library/',
             color: '#ff9500'
         };
 
