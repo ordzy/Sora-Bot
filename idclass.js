@@ -4,5 +4,5 @@ module.exports = {
     RoleDev: '1293431333686612008',
     RoleHelper:'1315038293343342642',
     ChannelMRC: '1354566997593165914', // Module Requested Channel (Receiver)
-    ChannelMR: '1347943743541608478'   // Module Request Channel (Sender)
+    ChannelMR: '1354754457912741888'   // Module Request Channel (Sender)
 };
