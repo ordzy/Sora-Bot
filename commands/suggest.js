@@ -152,8 +152,8 @@ const command = {
                 .setThumbnail(faviconUrl)
                 .setFooter({ text: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() });
 
-            // Send the public embed to the channel where the command was used.
-            const publicMessage = await interaction.channel.send({ embeds: [publicEmbed] });
+                const publicChannel = interaction.guild.channels.cache.get(idclass.ChannelMRC2);
+                const publicMessage = await publicChannel.send({ embeds: [publicEmbed] });
 
             // Update the in-memory cache using the suggestion message ID as the key.
             suggestionsCache[suggestionMessage.id] = {
@@ -273,7 +273,7 @@ const command = {
 
         // Update the public embed in the public channel.
         try {
-            const publicChannel = interaction.guild.channels.cache.get(suggestionData.publicChannelId);
+            const publicChannel = interaction.guild.channels.cache.get(idclass.ChannelMRC2);
             if (publicChannel) {
                 const publicMessage = await publicChannel.messages.fetch(suggestionData.publicMessageId);
                 if (publicMessage) {

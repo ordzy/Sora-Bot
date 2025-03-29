@@ -4,7 +4,7 @@ const idclass = require('../idclass');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('cmodules')
+        .setName('cembed')
         .setDescription('Create an embed with a logo and a button')
         .addStringOption(option =>
             option.setName('title')
