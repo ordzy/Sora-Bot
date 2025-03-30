@@ -1,41 +1,73 @@
-const { Client, GatewayIntentBits, REST, Routes, Collection, ActivityType } = require('discord.js');
+require('dotenv').config();
+const { Client, GatewayIntentBits, Collection, REST, Routes, ActivityType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+const idclass = require('./idclass');
 
-// Initialize the bot
 const client = new Client({
     intents: [
-        GatewayIntentBits.Guilds, 
+        GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
     ],
     partials: ['CHANNEL'],
 });
 
-client.commands = new Collection();
-const commands = [];
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+// Command Collections
+client.prefixCommands = new Collection();
+client.slashCommands = new Collection();
 
-for (const file of commandFiles) {
-    const command = require(path.join(commandsPath, file));
-    client.commands.set(command.data.name, command);
-    commands.push(command.data.toJSON());
+// Load Prefix Commands
+const prefixCommandFiles = fs.readdirSync('./prefix-commands').filter(file => file.endsWith('.js'));
+for (const file of prefixCommandFiles) {
+    const command = require(`./prefix-commands/${file}`);
+    client.prefixCommands.set(command.name, command);
 }
 
-// Global interaction handler for both slash commands and button interactions.
+// Load Slash Commands
+const slashCommands = [];
+const slashCommandFiles = fs.readdirSync('./slash-commands').filter(file => file.endsWith('.js'));
+for (const file of slashCommandFiles) {
+    const command = require(`./slash-commands/${file}`);
+    client.slashCommands.set(command.data.name, command);
+    slashCommands.push(command.data.toJSON());
+}
+
+// Load events
+const eventFiles = fs.readdirSync(path.join(__dirname, 'events')).filter(file => file.endsWith('.js'));
+for (const file of eventFiles) {
+    const event = require(path.join(__dirname, 'events', file));
+    if (event.once) {
+        client.once(event.name, (...args) => event.execute(...args, client));
+    } else {
+        client.on(event.name, (...args) => event.execute(...args, client));
+    }
+}
+
+// Slash Command Registration
+const rest = new REST({ version: '10' }).setToken(process.env.LoginID);
+(async () => {
+    try {
+        console.log('Started refreshing global application (/) commands.');
+        await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: slashCommands });
+        console.log('Successfully reloaded global application (/) commands.');
+    } catch (error) {
+        console.error(error);
+    }
+})();
+
 client.on('interactionCreate', async (interaction) => {
     try {
         if (interaction.isChatInputCommand()) {
-            const command = client.commands.get(interaction.commandName);
+            const command = client.slashCommands.get(interaction.commandName);
             if (!command) return;
             await command.execute(interaction);
         } else if (interaction.isButton()) {
             // Only process buttons for the suggestion command.
             if (['suggestionAccept', 'suggestionDecline'].includes(interaction.customId)) {
-                const command = client.commands.get('suggest');
+                const command = client.slashCommands.get('suggest');
                 if (command && command.buttonHandler) {
                     await command.buttonHandler(interaction);
                 }
@@ -46,36 +78,68 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
-// Auto-reply event (if needed)
-const autoReply = require('./events/auto-reply');
+// Prefix Support
+const prefixes = ['?', '.'];
 client.on('messageCreate', async (message) => {
-    if (!message.author.bot) {
-        autoReply(message);
+    const prefix = prefixes.find(p => message.content.startsWith(p));
+    if (!prefix) return;
+    
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const commandName = args.shift().toLowerCase();
+    const command = client.prefixCommands.get(commandName);
+    
+    if (command) {
+        try {
+            await command.execute(message, args, client);
+        } catch (error) {
+            console.error(`Error in command ${commandName}:`, error);
+    
+            message.reply({ content: process.env.ERR, allowedMentions: { parse: [] } });
+        }
     }
 });
 
-// Register slash commands globally
-const rest = new REST({ version: '10' }).setToken(process.env.logintoken);
-(async () => {
+// Function to log errors in a Discord channel
+async function logErrorToChannel(error, source = 'Unknown') {
     try {
-        console.log('Started refreshing global application (/) commands.');
-        await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
-        console.log('Successfully reloaded global application (/) commands.');
-    } catch (error) {
-        console.error(error);
+        const logChannel = await client.channels.fetch(idclass.ChannelErrorLogs).catch(() => null);
+        if (logChannel) {
+            const errorMessage = `**Error in:** \`${source}\`\n\`\`\`${error.stack || error.message || error}\`\`\``;
+            if (errorMessage.length > 2000) {
+                logChannel.send(`**Error in:** \`${source}\` (Too long, check logs)`);
+            } else {
+                logChannel.send(errorMessage);
+            }
+        } else {
+            console.error(`Failed to fetch error log channel (${idclass.ChannelErrorLogs}).`);
+        }
+    } catch (err) {
+        console.error(`Error while logging error:`, err);
     }
-})();
+}
 
-// Bot ready event
-client.once('ready', () => {
+// Redirect console errors to the error log channel
+const originalConsoleError = console.error;
+console.error = (...args) => {
+    originalConsoleError(...args); // Still print to the console
+    const errorString = args.map(arg => (arg instanceof Error ? arg.stack : arg)).join(' ');
+    logErrorToChannel(errorString, 'Console Error');
+};
+
+// Bot startup logging
+const startTime = Date.now();
+
+client.once('ready', async () => {
+    const endTime = Date.now();
+    const startupTime = ((endTime - startTime) / 1000).toFixed(2);
+
     console.log(`Logged in as ${client.user.tag}`);
-    client.user.setPresence({
-        status: 'online',
-        activities: [{
-            name: 'Anime on Sora',
-            type: ActivityType.Watching,
-        }],
-    });
+    console.log(`Startup time: ${startupTime}s`);
+
+    const logChannel = await client.channels.fetch(idclass.ChannelErrorLogs).catch(() => null);
+    if (logChannel) {
+        logChannel.send(`${client.user.tag} has been logged in successfully\nStartup Time: \`${startupTime}s\``);
+    }
 });
 
 client.login(process.env.logintoken);

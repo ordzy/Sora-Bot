@@ -172,8 +172,13 @@ const command = {
             saveSuggestions(suggestionsCache);
 
             // Edit the deferred reply to confirm submission.
-            await interaction.editReply({ content: 'Suggestion submitted!' });
-        } catch (err) {
+          const replyMessage = await interaction.editReply({ content: 'Suggestion submitted!', flags: 64 });
+             // Delete the reply message after 3 seconds.
+        setTimeout(async () => {
+            await replyMessage.delete();
+        }, 3000);
+
+             } catch (err) {
             console.error("Error executing /suggest command:", err);
             if (!interaction.deferred && !interaction.replied) {
                 await interaction.reply({ content: 'There was an error processing your suggestion.', flags: 64 });
