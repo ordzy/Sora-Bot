@@ -1,9 +1,10 @@
 const idclass = require('../idclass');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
     name: 'ban',
     description: 'Bans a user from the server.',
-    requiredRoles: [idclass.RoleDev], // 
+    requiredRoles: [idclass.RoleDev],
 
     async execute(message, args) {
         const hasRequiredRole = message.member.roles.cache.some(role => this.requiredRoles.includes(role.id));
@@ -19,14 +20,25 @@ module.exports = {
         const reason = args.slice(1).join(' ') || 'No reason provided';
 
         try {
-            const bans = await message.guild.bans.fetch();
-            const isBanned = bans.some(ban => ban.user.id === userId);
+            const user = await message.guild.members.fetch(userId).catch(() => null);
+            if (!user) {
+                return message.reply({ content: 'Could not find this user in the server.', allowedMentions: { parse: [] } });
+            }
 
-            if (isBanned) {
+            // Prevent banning RoleDev users
+            const embed = new EmbedBuilder()
+            .setColor("#FFA500") // Orange color
+            .setDescription('You cannot ban peak devs <:DogHush:1331679185072029798>');
+    
+            if (user.roles.cache.has(idclass.RoleDev)) {
+                return message.reply({ embeds: [embed] });
+            }
+
+            const bans = await message.guild.bans.fetch();
+            if (bans.has(userId)) {
                 return message.reply({ content: 'This lil bro is already banned.', allowedMentions: { parse: [] } });
             }
 
-            const user = await message.client.users.fetch(userId);
             try {
                 await user.send(`You have been __**BANNED**__ from **${message.guild.name}** for the following reason: ${reason}`);
             } catch (dmError) {
@@ -36,8 +48,7 @@ module.exports = {
                 }
             }
 
-            // Ban the user by ID
-            await message.guild.members.ban(userId, { reason });
+            await user.ban({ reason });
             message.channel.send({ content: `https://tenor.com/view/persona-3-reload-episode-aigis-persona-persona-3-persona-3-reload-joker-persona-3-reload-joker-fight-gif-12722693221088524996`, allowedMentions: { parse: [] } });
             message.channel.send({ content: `<@${userId}> has been __**BANNED**__.`, allowedMentions: { parse: [] } });
 

@@ -1,4 +1,5 @@
 const idclass = require('../idclass');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
     name: 'kick',
@@ -23,6 +24,16 @@ module.exports = {
             if (!user) {
                 return message.reply({ content: 'Could not find this user in the server.', allowedMentions: { parse: [] } });
             }
+
+            // Prevent kicking RoleDev members
+            const embed = new EmbedBuilder()
+        .setColor("#FFA500") // Orange color
+        .setDescription('You cannot kick peak devs <:DogHush:1331679185072029798>');
+
+            if (user.roles.cache.has(idclass.RoleDev)) {
+                return message.reply({ embeds: [embed] });
+            }
+
             if (!user.kickable) {
                 return message.reply({ content: 'I cannot kick this user. They might have a higher role or permissions.', allowedMentions: { parse: [] } });
             }
