@@ -3,77 +3,106 @@ const idclass = require('../idclass');
 module.exports = {
     name: 'giver',
     description: 'Gives specified roles to a mentioned user or by user ID.',
-    requiredRoles: [idclass.RoleDev, idclass.RoleModerator], // Allow moderators as well
+    requiredRoles: [idclass.RoleDev, idclass.RoleModerator],
 
     async execute(message, args) {
-        const hasRequiredRole = message.member.roles.cache.some(role => this.requiredRoles.includes(role.id));
-        if (!hasRequiredRole) {
-            return message.channel.send({ content: 'You do not have permission to use this command.', allowedMentions: { parse: [] } });
+        const isAuthorized = message.member.roles.cache.some(role =>
+            this.requiredRoles.includes(role.id)
+        );
+
+        if (!isAuthorized) {
+            return message.channel.send({
+                content: 'You do not have permission to use this command.',
+                allowedMentions: { parse: [] }
+            });
         }
 
         if (args.length < 2) {
-            return message.channel.send({ content: 'Please provide a user mention or user ID and at least one role ID.', allowedMentions: { parse: [] } });
+            return message.channel.send({
+                content: 'Usage: `giver <@user|userID> <roleID1> [roleID2 ...]`',
+                allowedMentions: { parse: [] }
+            });
         }
 
-        // Get the user (either mention or ID)
-        let user;
+        // Get user from mention or ID
+        let targetMember;
         if (args[0].startsWith('<@') && args[0].endsWith('>')) {
-            // User is mentioned
-            user = message.mentions.members.first();
+            targetMember = message.mentions.members.first();
         } else {
-            // User is provided by ID
             const userId = args[0].replace(/[<@!>]/g, '');
-            user = await message.guild.members.fetch(userId).catch(() => null);
+            targetMember = await message.guild.members.fetch(userId).catch(() => null);
         }
 
-        if (!user) {
-            return message.channel.send({ content: 'Please mention a valid user or provide a valid user ID.', allowedMentions: { parse: [] } });
+        if (!targetMember) {
+            return message.channel.send({
+                content: 'Could not find the specified user.',
+                allowedMentions: { parse: [] }
+            });
         }
 
         const roleIds = args.slice(1);
-        const invalidRoleIds = [];
         const validRoles = [];
-        const restrictedRoles = [idclass.RoleDev]; // Include staff roles
+        const rejectedRoles = [];
 
-        roleIds.forEach(roleId => {
+        for (const roleId of roleIds) {
             const role = message.guild.roles.cache.get(roleId);
-            if (role) {
-                // Check if the role is restricted and the user doesn't have the Owner role
-                if (restrictedRoles.includes(role.id) && !message.member.roles.cache.has(idclass.RoleDev)) {
-                    invalidRoleIds.push(roleId);
-                } else {
-                    validRoles.push(role);
-                }
-            } else {
-                invalidRoleIds.push(roleId);
+
+            if (!role) {
+                rejectedRoles.push(roleId);
+                continue;
             }
-        });
+
+            // No one can give the developer role
+            if (role.id === idclass.RoleDev) {
+                rejectedRoles.push(roleId);
+                continue;
+            }
+
+            validRoles.push(role);
+        }
 
         try {
-            if (invalidRoleIds.length > 0) {
-                await message.channel.send({ content: `Invalid or restricted role IDs: ${invalidRoleIds.join(', ')}`, allowedMentions: { parse: [] } });
-            }
-
             if (validRoles.length > 0) {
-                await user.roles.add(validRoles.map(role => role.id));
-                await message.channel.send({ content: `Roles added to <@${user.id}>: ${validRoles.map(role => role.name).join(', ')}`, allowedMentions: { parse: [] } });
+                await targetMember.roles.add(validRoles.map(r => r.id));
+                await message.channel.send({
+                    content: `✅ Added roles to <@${targetMember.id}>: ${validRoles.map(r => r.name).join(', ')}`,
+                    allowedMentions: { parse: [] }
+                });
 
-                // Log the action
                 const logChannel = message.guild.channels.cache.get(idclass.LogChannel);
                 if (logChannel) {
-                    logChannel.send({ content: `<@${message.author.id}> added roles (${validRoles.map(role => role.name).join(', ')}) to <@${user.id}>.`, allowedMentions: { parse: [] } });
+                    logChannel.send({
+                        content: `📝 <@${message.author.id}> added roles (${validRoles.map(r => r.name).join(', ')}) to <@${targetMember.id}>.`,
+                        allowedMentions: { parse: [] }
+                    });
                 }
             } else {
-                await message.channel.send({ content: 'No valid roles to add.', allowedMentions: { parse: [] } });
+                await message.channel.send({
+                    content: 'No valid roles to add.',
+                    allowedMentions: { parse: [] }
+                });
             }
-        } catch (error) {
-            console.error(error);
-            await message.channel.send({ content: 'An error occurred while adding roles.', allowedMentions: { parse: [] } });
 
-            // Log the error
+            if (rejectedRoles.length > 0) {
+                await message.channel.send({
+                    content: `❌ Invalid or restricted role IDs: ${rejectedRoles.join(', ')}`,
+                    allowedMentions: { parse: [] }
+                });
+            }
+
+        } catch (err) {
+            console.error(err);
+            await message.channel.send({
+                content: 'An error occurred while assigning roles.',
+                allowedMentions: { parse: [] }
+            });
+
             const logChannel = message.guild.channels.cache.get(idclass.LogChannel);
             if (logChannel) {
-                logChannel.send({ content: `Error occurred while adding roles to <@${user.id}> by ${message.author.id}: ${error.message}`, allowedMentions: { parse: [] } });
+                logChannel.send({
+                    content: `❗ Error assigning roles to <@${targetMember.id}> by <@${message.author.id}>: ${err.message}`,
+                    allowedMentions: { parse: [] }
+                });
             }
         }
     }
