@@ -47,10 +47,10 @@ function saveSuggestions(suggestions) {
     }
 }
 
-// Create an in-memory cache for suggestions
+// In‑memory cache
 let suggestionsCache = loadSuggestions();
 
-const command = {
+module.exports = {
     data: new SlashCommandBuilder()
         .setName('suggest')
         .setDescription('Submit a suggestion with a name, link, language, and type')
@@ -76,7 +76,6 @@ const command = {
                 )),
     async execute(interaction) {
         try {
-            // Defer reply using flags (64) for ephemeral response.
             await interaction.deferReply({ flags: 64 });
             
             const name = interaction.options.getString('name');
@@ -84,7 +83,7 @@ const command = {
             const language = interaction.options.getString('language');
             const type = interaction.options.getString('type');
 
-            // Validate channels using idclass values.
+            // Validate correct channel
             const suggestionChannel = interaction.guild.channels.cache.get(idclass.ChannelMRC);
             if (!suggestionChannel) {
                 return interaction.editReply({ content: 'Suggestion channel not found.' });
@@ -93,27 +92,20 @@ const command = {
                 return interaction.editReply({ content: `This command can only be used in <#${idclass.ChannelMR}>.` });
             }
 
-            // Prepare a favicon URL for the thumbnail.
+            // Thumbnail & preview
             const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(link)}`;
-
-            // Optionally try to fetch a preview image by sending the link (best effort).
             let previewImage = null;
             try {
-                const messageWithLink = await suggestionChannel.send({ content: link });
-                if (messageWithLink.embeds.length > 0) {
-                    const previewEmbed = messageWithLink.embeds[0];
-                    if (previewEmbed.image && previewEmbed.image.url) {
-                        previewImage = previewEmbed.image.url;
-                    }
+                const msg = await suggestionChannel.send({ content: link });
+                if (msg.embeds[0]?.image?.url) {
+                    previewImage = msg.embeds[0].image.url;
                 }
-            } catch (error) {
-                console.error("Failed to fetch preview image:", error);
+            } catch (err) {
+                console.error("Failed to fetch preview image:", err);
             }
 
-            // Define pending color (orange).
+            // Build suggestion embed + buttons
             const pendingColor = "#ff9500";
-
-            // Create the suggestion embed for the suggestion channel.
             const suggestionEmbed = new EmbedBuilder()
                 .setTitle(name)
                 .setURL(link)
@@ -123,7 +115,6 @@ const command = {
                 .addFields({ name: 'Status', value: 'Pending' });
             if (previewImage) suggestionEmbed.setImage(previewImage);
 
-            // Create an action row with Accept and Decline buttons.
             const buttonsRow = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId('suggestionAccept')
@@ -135,10 +126,13 @@ const command = {
                     .setStyle('Danger')
             );
 
-            // Send the suggestion embed (with buttons) to the suggestion channel.
-            const suggestionMessage = await suggestionChannel.send({ embeds: [suggestionEmbed], components: [buttonsRow] });
+            // Send into review channel
+            const suggestionMessage = await suggestionChannel.send({
+                embeds: [suggestionEmbed],
+                components: [buttonsRow]
+            });
 
-            // Create the public embed for the channel where the command was used.
+            // Public announcement
             const publicEmbed = new EmbedBuilder()
                 .setTitle('New Module Submission')
                 .setColor(pendingColor)
@@ -152,16 +146,16 @@ const command = {
                 .setThumbnail(faviconUrl)
                 .setFooter({ text: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() });
 
-                const publicChannel = interaction.guild.channels.cache.get(idclass.ChannelMRC2);
-                const publicMessage = await publicChannel.send({ embeds: [publicEmbed] });
+            const publicChannel = interaction.guild.channels.cache.get(idclass.ChannelMRC2);
+            const publicMessage = await publicChannel.send({ embeds: [publicEmbed] });
 
-            // Update the in-memory cache using the suggestion message ID as the key.
+            // Cache & save
             suggestionsCache[suggestionMessage.id] = {
                 suggestionMessageId: suggestionMessage.id,
                 publicMessageId: publicMessage.id,
                 guildId: interaction.guild.id,
                 suggestionChannelId: suggestionChannel.id,
-                publicChannelId: interaction.channel.id,
+                publicChannelId: publicChannel.id,
                 name,
                 link,
                 language,
@@ -171,14 +165,21 @@ const command = {
             };
             saveSuggestions(suggestionsCache);
 
-            // Edit the deferred reply to confirm submission.
-          const replyMessage = await interaction.editReply({ content: 'Suggestion submitted!', flags: 64 });
-             // Delete the reply message after 3 seconds.
-        setTimeout(async () => {
-            await replyMessage.delete();
-        }, 3000);
+            // Confirm to user & auto‑delete (safely)
+            const replyMessage = await interaction.editReply({
+                content: 'Suggestion submitted!',
+                flags: 64
+            });
+            setTimeout(async () => {
+                try {
+                    await replyMessage.delete();
+                } catch (err) {
+                    // Ignore “Unknown Message”
+                    if (err.code !== 10008) console.error("Failed to delete reply:", err);
+                }
+            }, 3000);
 
-             } catch (err) {
+        } catch (err) {
             console.error("Error executing /suggest command:", err);
             if (!interaction.deferred && !interaction.replied) {
                 await interaction.reply({ content: 'There was an error processing your suggestion.', flags: 64 });
@@ -187,124 +188,95 @@ const command = {
             }
         }
     },
-    // Button handler for the suggestion command.
+
     async buttonHandler(interaction) {
         if (!interaction.isButton()) return;
         if (!['suggestionAccept', 'suggestionDecline'].includes(interaction.customId)) return;
 
         const suggestionMessageId = interaction.message.id;
-        if (!suggestionsCache[suggestionMessageId]) {
-            console.error("Suggestion not found in storage. Current cache:", suggestionsCache, "Requested ID:", suggestionMessageId);
+        const data = suggestionsCache[suggestionMessageId];
+        if (!data) {
+            console.error("Suggestion not in cache:", suggestionMessageId);
             return;
         }
-        const suggestionData = suggestionsCache[suggestionMessageId];
 
-        let newStatus, newColor;
-        let reason = null; // Initialize reason as null
-
-        // Handle Accept button
+        let newStatus, newColor, reason = null;
         if (interaction.customId === 'suggestionAccept') {
-            try {
-                // Defer update for accept interactions.
-                await interaction.deferUpdate();
-            } catch (error) {
-                console.error("Error deferring accept interaction:", error);
-                return;
-            }
+            await interaction.deferUpdate();
             newStatus = 'Approved';
             newColor = Colors.Green;
-        }
-        // Handle Decline button (do not defer to allow modal to be shown)
-        else if (interaction.customId === 'suggestionDecline') {
-            // Create a modal to ask for a reason for decline.
+        } else {
+            // Decline flow with modal
             const modal = new ModalBuilder()
                 .setCustomId(`declineModal_${suggestionMessageId}`)
                 .setTitle('Decline Reason');
             const reasonInput = new TextInputBuilder()
                 .setCustomId('declineReason')
-                // Updated label to be under 45 characters.
                 .setLabel('Reason for decline (optional)')
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(false);
-            const modalRow = new ActionRowBuilder().addComponents(reasonInput);
-            modal.addComponents(modalRow);
+            modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
+            await interaction.showModal(modal);
+
             try {
-                await interaction.showModal(modal);
-            } catch (error) {
-                console.error("Error showing modal:", error);
-                return;
-            }
-            try {
-                // Wait for the modal submission.
                 const submitted = await interaction.awaitModalSubmit({
                     filter: i => i.customId === `declineModal_${suggestionMessageId}` && i.user.id === interaction.user.id,
                     time: 30000
                 });
-                reason = submitted.fields.getTextInputValue('declineReason').trim();
-                if (reason === "") {
-                    reason = null;
-                }
-                await submitted.reply({ content: 'Suggestion declined.', ephemeral: true});
-            } catch (err) {
-                console.error("Modal submission timed out or error:", err);
-                // If timeout/error, proceed without a reason.
+                reason = submitted.fields.getTextInputValue('declineReason').trim() || null;
+                await submitted.reply({ content: 'Suggestion declined.', flags: 64 });
+            } catch {
+                // timed out or error, continue without reason
             }
+
             newStatus = 'Declined';
             newColor = Colors.Red;
         }
 
-        // Update the suggestion embed in the suggestion channel.
+        // Update review embed
         try {
-            const suggestionChannel = interaction.guild.channels.cache.get(suggestionData.suggestionChannelId);
-            if (!suggestionChannel) throw new Error("Suggestion channel not found.");
-            const suggestionMessage = await suggestionChannel.messages.fetch(suggestionMessageId);
-            if (!suggestionMessage) throw new Error("Suggestion message not found.");
-            const oldEmbed = suggestionMessage.embeds[0];
-            const updatedEmbed = EmbedBuilder.from(oldEmbed)
+            const chan = interaction.guild.channels.cache.get(data.suggestionChannelId);
+            let msg;
+            try {
+                msg = await chan.messages.fetch(suggestionMessageId);
+            } catch (err) {
+                if (err.code === 10008) return console.warn("Review message gone, skipping update");
+                throw err;
+            }
+            const updated = EmbedBuilder.from(msg.embeds[0])
                 .setColor(newColor)
                 .spliceFields(0, 1, { name: 'Status', value: newStatus });
-            // If a reason was provided, add a bolded field called "Reason".
-            if (reason) {
-                updatedEmbed.addFields({ name: '**Reason**', value: reason });
-            }
-            // Disable the buttons so they cannot be clicked again.
-            const oldRow = suggestionMessage.components[0];
-            const disabledRow = ActionRowBuilder.from(oldRow);
-            disabledRow.components = disabledRow.components.map(button => ButtonBuilder.from(button).setDisabled(true));
-            await suggestionMessage.edit({ embeds: [updatedEmbed], components: [disabledRow] });
-        } catch (error) {
-            console.error("Error updating suggestion message:", error);
+            if (reason) updated.addFields({ name: '**Reason**', value: reason });
+
+            const disabledRow = ActionRowBuilder.from(msg.components[0]);
+            disabledRow.components = disabledRow.components.map(b => ButtonBuilder.from(b).setDisabled(true));
+            await msg.edit({ embeds: [updated], components: [disabledRow] });
+        } catch (err) {
+            console.error("Error updating suggestion embed:", err);
         }
 
-        // Update the public embed in the public channel.
+        // Update public embed
         try {
-            const publicChannel = interaction.guild.channels.cache.get(idclass.ChannelMRC2);
-            if (publicChannel) {
-                const publicMessage = await publicChannel.messages.fetch(suggestionData.publicMessageId);
-                if (publicMessage) {
-                    const oldPublicEmbed = publicMessage.embeds[0];
-                    const updatedPublicEmbed = EmbedBuilder.from(oldPublicEmbed)
-                        .setColor(newColor)
-                        .spliceFields(4, 1, { name: 'Status', value: newStatus });
-                    if (reason) {
-                        updatedPublicEmbed.addFields({ name: '**Reason**', value: reason });
-                    }
-                    await publicMessage.edit({ embeds: [updatedPublicEmbed] });
-                } else {
-                    console.error("Public message not found.");
-                }
-            } else {
-                console.error("Public channel not found.");
+            const chan = interaction.guild.channels.cache.get(data.publicChannelId);
+            let msg;
+            try {
+                msg = await chan.messages.fetch(data.publicMessageId);
+            } catch (err) {
+                if (err.code === 10008) return console.warn("Public message gone, skipping update");
+                throw err;
             }
-        } catch (error) {
-            console.error("Error updating public embed:", error);
+            const updatedPub = EmbedBuilder.from(msg.embeds[0])
+                .setColor(newColor)
+                .spliceFields(4, 1, { name: 'Status', value: newStatus });
+            if (reason) updatedPub.addFields({ name: '**Reason**', value: reason });
+            await msg.edit({ embeds: [updatedPub] });
+        } catch (err) {
+            console.error("Error updating public embed:", err);
         }
 
-        // Update the in-memory cache and save to file.
-        suggestionsCache[suggestionMessageId].status = newStatus;
-        if (reason) suggestionsCache[suggestionMessageId].reason = reason;
+        // Persist status
+        data.status = newStatus;
+        if (reason) data.reason = reason;
         saveSuggestions(suggestionsCache);
     }
 };
-
-module.exports = command;
