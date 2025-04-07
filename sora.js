@@ -3,6 +3,7 @@ const { Client, GatewayIntentBits, Collection, REST, Routes, ActivityType } = re
 const fs = require('fs');
 const path = require('path');
 const idclass = require('./idclass');
+const remindCommand = require('./slash-commands/remind'); // Added Reminder Command Import
 
 const client = new Client({
     intents: [
@@ -63,7 +64,7 @@ client.on('interactionCreate', async (interaction) => {
         if (interaction.isChatInputCommand()) {
             const command = client.slashCommands.get(interaction.commandName);
             if (!command) return;
-            await command.execute(interaction);
+            await command.execute(interaction, client); // Added client parameter for reminders
         } else if (interaction.isButton()) {
             // Only process buttons for the suggestion command.
             if (['suggestionAccept', 'suggestionDecline'].includes(interaction.customId)) {
@@ -140,6 +141,9 @@ client.once('ready', async () => {
     if (logChannel) {
         logChannel.send(`${client.user.tag} has been logged in successfully\nStartup Time: \`${startupTime}s\``);
     }
+
+    // Schedule all pending reminders
+    remindCommand.scheduleAllReminders(client);
 });
 
 client.login(process.env.LoginID);
