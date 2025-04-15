@@ -1,8 +1,17 @@
-// Import necessary modules from Discord.js
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const idclass = require('../idclass');
+import {
+    SlashCommandBuilder,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChannelType,
+    TextChannel,
+    GuildMember
+} from 'discord.js';
+import idclass from '../idclass';
 
-module.exports = {
+export default {
     data: new SlashCommandBuilder()
         .setName('cembed')
         .setDescription('Create an embed with a logo and a button')
@@ -33,47 +42,51 @@ module.exports = {
         .addChannelOption(option =>
             option.setName('channel')
                 .setDescription('Select the channel to send the embed to')
+                .addChannelTypes(ChannelType.GuildText)
                 .setRequired(true)),
 
-    async execute(interaction) {
-        // List of role IDs allowed to execute the command
-        const allowedRoleIDs = [idclass.RoleDev, idclass.RoleModuleCreator]; // Ensure correct references
-
-        // Check if the user has any of the allowed roles (prevents crashes in DMs)
-        if (!interaction.member || !interaction.member.roles.cache.some(role => allowedRoleIDs.includes(role.id))) {
-            return interaction.reply({ content: 'You do not have the required role to execute this command.', ephemeral: true });
+    async execute(interaction: ChatInputCommandInteraction) {
+        const roles = idclass
+        const allowedRoleIDs = [roles.roleDev()];
+        
+        const member = interaction.member as GuildMember;
+        if (!member.roles.cache.some(role => allowedRoleIDs.includes(role.id))) {
+            return interaction.reply({
+                content: '❌ You do not have the required role to execute this command.',
+                ephemeral: true
+            });
         }
 
-        const title = interaction.options.getString('title');
-        const description = interaction.options.getString('description');
-        const logo = interaction.options.getString('logo');
-        const link = interaction.options.getString('link');
-        const buttonName = interaction.options.getString('button_name');
-        const color = interaction.options.getString('color');
-        const channel = interaction.options.getChannel('channel');
+        const title = interaction.options.getString('title', true);
+        const description = interaction.options.getString('description', true);
+        const logo = interaction.options.getString('logo', true);
+        const link = interaction.options.getString('link', true);
+        const buttonName = interaction.options.getString('button_name', true);
+        const color = interaction.options.getString('color', true);
+        const channel = interaction.options.getChannel('channel', true) as TextChannel;
 
-        // Create the embed
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)
             .setThumbnail(logo)
-            .setColor(color);
+            .setColor(color as `#${string}`);
 
-        // Create the button
         const button = new ButtonBuilder()
             .setLabel(buttonName)
             .setStyle(ButtonStyle.Link)
             .setURL(link);
 
-        const row = new ActionRowBuilder().addComponents(button);
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button);
 
-        // Send the embed to the specified channel
         try {
             await channel.send({ embeds: [embed], components: [row] });
-            await interaction.reply({ content: `Embed successfully sent to ${channel}!` });
+            await interaction.reply({ content: `✅ Embed successfully sent to ${channel}!`, ephemeral: true });
         } catch (error) {
             console.error('Error sending the embed:', error);
-            await interaction.reply({ content: 'There was an error sending the embed. Please check my permissions and try again.', ephemeral: true });
+            await interaction.reply({
+                content: '❌ There was an error sending the embed. Please check my permissions and try again.',
+                ephemeral: true
+            });
         }
-    },
+    }
 };

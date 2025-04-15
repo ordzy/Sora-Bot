@@ -1,22 +1,24 @@
-# Sora-Bot
-For Sora Modular App Server Discord Bot
+# Sora Bot
 
-# Installation
-Node.JS from their Official Site
+A modular Discord bot built in **TypeScript** for the Sora Modular App Server. Designed with scalability, clarity, and ease of use in mind.
 
+##  Features
 
-`npm install discord.js@latest`
+- Clean folder structure (`prefix-commands`, `slash-commands`, `events`, etc.)
+- Built with TypeScript for modern development and type safety
+- Centralized role permission management via `idclass.ts`
+- Simple to configure, run, and extend
 
-`npm install dotenv`
+##  Installation
 
-Rename example.env to .env
+> Requires [Node.js](https://nodejs.org/) (v18 or higher recommended)
 
+```bash
+git clone https://github.com/your-username/Sora-Bot.git
+cd Sora-Bot
+npm install discord.js@latest dotenv
+npm install
+```
 # How To Run
-Open Terminal/CMD in your Sora bot folder 
 
-`node sora.js`
-
-Enter then boom you got it running!
-
-# Important
-Make sure to change idclass role ids to your server roles in order to execute commands.
+```npx tsx sora.ts```
