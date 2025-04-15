@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config();
 
-const isTest = process.env.isTest;
+const isTest = process.env.isTest === "true";
 
 class IDClass {
 
