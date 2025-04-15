@@ -22,4 +22,4 @@ npm install
 # How To Run
 Rename example.env to .env then
 
-```npx tsx sora.ts```
+```npx ts-node sora.ts```
