@@ -20,5 +20,6 @@ npm install discord.js@latest dotenv
 npm install
 ```
 # How To Run
+Rename example.env to .env then
 
 ```npx tsx sora.ts```
