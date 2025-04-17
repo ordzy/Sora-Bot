@@ -23,3 +23,5 @@ npm install
 Rename example.env to .env then
 
 ```npx ts-node sora.ts```
+
+or Open run.bat if on Windows.

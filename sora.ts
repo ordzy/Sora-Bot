@@ -5,15 +5,11 @@ import {
     Collection,
     REST,
     Routes,
-    ActivityType,
     Partials,
-    TextChannel,
-    DMChannel,
-    NewsChannel
 } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
-import idclass from './idclass';
+import './utils/errorLogger';
 
 // Extend Discord Client with custom properties
 interface ExtendedClient extends Client {
@@ -22,7 +18,7 @@ interface ExtendedClient extends Client {
 }
 
 // Create the bot client
-const client = new Client({
+export const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -87,89 +83,5 @@ async function init() {
 
 init();
 
-// Slash command and button handler
-client.on('interactionCreate', async (interaction) => {
-    try {
-        if (interaction.isChatInputCommand()) {
-            const command = client.slashCommands.get(interaction.commandName);
-            if (!command) return;
-            await command.execute(interaction, client);
-        } else if (interaction.isButton()) {
-            if (['suggestionAccept', 'suggestionDecline'].includes(interaction.customId)) {
-                const command = client.slashCommands.get('suggest');
-                if (command?.buttonHandler) {
-                    await command.buttonHandler(interaction);
-                }
-            }
-        }
-    } catch (error) {
-        console.error(error);
-    }
-});
 
-// Prefix command handler
-const prefixes = ['?', '.'];
-client.on('messageCreate', async (message) => {
-    const prefix = prefixes.find(p => message.content.startsWith(p));
-    if (!prefix) return;
 
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const commandName = args.shift()!.toLowerCase();
-    const command = client.prefixCommands.get(commandName);
-
-    if (command) {
-        try {
-            await command.execute(message, args, client);
-        } catch (error) {
-            console.error(`Error in command ${commandName}:`, error);
-            message.reply({ content: process.env.ERR, allowedMentions: { parse: [] } });
-        }
-    }
-});
-
-// Error logging to channel
-async function logErrorToChannel(error: any, source = 'Unknown') {
-    try {
-        const logChannel = await client.channels.fetch(idclass.channelErrorLogs()).catch(() => null);
-        if (
-            logChannel &&
-            (logChannel instanceof TextChannel || logChannel instanceof DMChannel || logChannel instanceof NewsChannel)
-        ) {
-            const errorMessage = `**Error in:** \`${source}\`\n\`\`\`${error.stack || error.message || error}\`\`\``;
-            if (errorMessage.length > 2000) {
-                logChannel.send(`**Error in:** \`${source}\` (Too long, check logs)`);
-            } else {
-                await logChannel.send(errorMessage);
-            }
-        }
-    } catch (err) {
-        console.error(`Error while logging error:`, err);
-    }
-}
-
-// Hook into console.error
-const originalConsoleError = console.error;
-console.error = (...args) => {
-    originalConsoleError(...args);
-    const errorString = args.map(arg => (arg instanceof Error ? arg.stack : arg)).join(' ');
-    logErrorToChannel(errorString, 'Console Error');
-};
-
-// Bot Ready
-const startTime = Date.now();
-client.once('ready', async () => {
-    const endTime = Date.now();
-    const startupTime = ((endTime - startTime) / 1000).toFixed(2);
-
-    console.log(`Logged in as ${client.user!.tag}`);
-    console.log(`Startup time: ${startupTime}s`);
-
-    const logChannel = await client.channels.fetch(idclass.channelErrorLogs()).catch(() => null);
-    if (
-        logChannel &&
-        (logChannel instanceof TextChannel || logChannel instanceof DMChannel || logChannel instanceof NewsChannel)
-    ) {
-        await logChannel.send(`${client.user!.tag} has been logged in successfully\nStartup Time: \`${startupTime}s\``);
-    }
-
-});

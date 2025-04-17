@@ -96,6 +96,14 @@ class IDClass {
   channelMRC2() {
     return isTest ? "1355635958795731075" : "1355238695220809910";
   }
+ 
+  channelJLG() {
+    return isTest ? "1362495682371387576" : "1362495755310334042";
+  }
+ 
+  VCTotal() {
+    return isTest ? "1362447889615425566" : "1362447649206435911";
+  }
 }
 
 //role/channelNAME() {
