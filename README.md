@@ -12,7 +12,7 @@ A modular Discord bot built in **TypeScript** for the Sora Modular App Server. D
 ##  Installation
 
 > Requires [Node.js](https://nodejs.org/) (v18 or higher recommended)
-
+Fork this repo first then
 ```bash
 git clone https://github.com/your-username/Sora-Bot.git
 cd Sora-Bot
