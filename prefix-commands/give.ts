@@ -14,14 +14,14 @@ module.exports = {
 
         if (!memberRoles || !memberRoles.some((role: { id: string; }) => requiredRoles.includes(role.id))) {
             return message.reply({
-                content: '🚫 You do not have permission to use this command.',
+                content: 'You do not have permission to use this command.',
                 allowedMentions: { parse: [] }
             });
         }
 
         if (args.length < 2) {
             return message.reply({
-                content: '⚠️ Usage: `giver <@user|userID> <roleID1> [roleID2 ...]`',
+                content: 'Usage: `giver <@user|userID> <roleID1> [roleID2 ...]`',
                 allowedMentions: { parse: [] }
             });
         }

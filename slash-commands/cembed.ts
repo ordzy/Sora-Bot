@@ -52,7 +52,7 @@ export default {
         const member = interaction.member as GuildMember;
         if (!member.roles.cache.some(role => allowedRoleIDs.includes(role.id))) {
             return interaction.reply({
-                content: '❌ You do not have the required role to execute this command.',
+                content: 'You do not have the required role to execute this command.',
                 ephemeral: true
             });
         }
@@ -80,11 +80,11 @@ export default {
 
         try {
             await channel.send({ embeds: [embed], components: [row] });
-            await interaction.reply({ content: `✅ Embed successfully sent to ${channel}!`, ephemeral: true });
+            await interaction.reply({ content: `Embed successfully sent to ${channel}!`, ephemeral: true });
         } catch (error) {
             console.error('Error sending the embed:', error);
             await interaction.reply({
-                content: '❌ There was an error sending the embed. Please check my permissions and try again.',
+                content: 'There was an error sending the embed. Please check my permissions and try again.',
                 ephemeral: true
             });
         }

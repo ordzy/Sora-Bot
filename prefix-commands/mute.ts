@@ -54,7 +54,7 @@ import {
   
           try {
             await member.send(
-              `You have been muted in **${message.guild?.name}** for **${duration}** due to: **${reason}**`
+              `You have been __**MUTED**__ in **${message.guild?.name}** for **${duration}** due to: **${reason}**`
             );
           } catch {
             if (logChannel?.type === ChannelType.GuildText) {
