@@ -18,7 +18,7 @@ export default {
             title: 'Sora Beta',
             description: 'Download and extract the file, then sideload it onto your device.',
             icon: 'https://cdn.discordapp.com/attachments/1318240587886891029/1324041711995060274/afbeelding.png?ex=679e426f&is=679cf0ef&hm=c67bde9bbf7f1619965aa7706f7a60e400f234af58c23c07711da1d4c18f11e3&',
-            githubLink: 'https://nightly.link/cranci1/Sora/workflows/build/dev/Sulfur-IPA.zip',
+            githubLink: 'https://github.com/cranci1/Sora/raw/refs/heads/dev/public-build/Sulfur.ipa',
             color: '#ff9500',
         };
 
