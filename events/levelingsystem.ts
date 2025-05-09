@@ -28,22 +28,25 @@ module.exports = {
 
     if (cooldown.has(cooldownKey)) return;
     cooldown.add(cooldownKey);
-    setTimeout(() => cooldown.delete(cooldownKey), 60000); // 1 min
+    setTimeout(() => cooldown.delete(cooldownKey), 60000); // 1 minute cooldown
 
-    let userData = (await db.get(userKey)) || { xp: 0, level: 0 };
+    let userData = await db.get(userKey) || { level: 0, xp: 0, totalXp: 0 };
+
     const xpGain = Math.floor(Math.random() * 10) + 10;
     userData.xp += xpGain;
+    userData.totalXp += xpGain;
 
-    let nextLevelXp = 100 * Math.pow(2, userData.level);
+    const getXpForLevel = (level: number) => 5 * (level ** 2) + 50 * level + 100;
 
     let leveledUp = false;
-    
+    let nextLevelXp = getXpForLevel(userData.level);
+
     while (userData.xp >= nextLevelXp) {
+      userData.xp -= nextLevelXp;
       userData.level++;
       leveledUp = true;
-      nextLevelXp = 100 * Math.pow(2, userData.level); 
+      nextLevelXp = getXpForLevel(userData.level);
     }
-    
 
     if (leveledUp) {
       await message.reply({

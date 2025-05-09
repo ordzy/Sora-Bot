@@ -19,33 +19,41 @@ export default {
     if (!guildId) return;
 
     const all = (await db.all()).filter(entry => entry.id.startsWith(`xp_${guildId}_`));
-    const sorted = all.sort((a, b) => b.value.xp + b.value.level * 1000 - (a.value.xp + a.value.level * 1000));
+    const sorted = all
+      .filter(entry => entry.value.totalXp !== undefined)
+      .sort((a, b) => b.value.totalXp - a.value.totalXp);
 
     if (sorted.length === 0) {
-      return interaction.reply({ content: 'No XP data found for this server.', ephemeral: true });
+      return interaction.reply({
+        content: 'No XP data found for this server.',
+        ephemeral: true,
+      });
     }
 
     let page = 0;
     const pageSize = 10;
     const totalPages = Math.ceil(sorted.length / pageSize);
 
-    const generateEmbed = (page: number) => {
+    const generateEmbed = async (page: number) => {
       const start = page * pageSize;
       const pageData = sorted.slice(start, start + pageSize);
 
       const embed = new EmbedBuilder()
-        .setTitle('XP Leaderboard')
+        .setTitle('🏆 XP Leaderboard')
         .setColor('#ff9500')
         .setFooter({ text: `Page ${page + 1} of ${totalPages}` });
 
       for (let i = 0; i < pageData.length; i++) {
         const entry = pageData[i];
         const userId = entry.id.split('_')[2];
-        const { xp, level } = entry.value;
+        const { level, totalXp } = entry.value;
+
+        const member = await interaction.guild!.members.fetch(userId).catch(() => null);
+        const displayName = member?.displayName || `Unknown User (${userId})`;
 
         embed.addFields({
-          name: `#${start + i + 1} - <@${userId}>`,
-          value: `Level: **${level}** | XP: **${xp}**`,
+          name: `#${start + i + 1} - ${displayName}`,
+          value: `Level: **${level}** | Total XP: **${totalXp}**`,
           inline: false,
         });
       }
@@ -70,14 +78,14 @@ export default {
     };
 
     const message = await interaction.reply({
-      embeds: [generateEmbed(page)],
+      embeds: [await generateEmbed(page)],
       components: [getRow(page)],
       fetchReply: true,
     });
 
     const collector = message.createMessageComponentCollector({
       componentType: ComponentType.Button,
-      time: 60_000,
+      time: 60000,
     });
 
     collector.on('collect', async i => {
@@ -91,7 +99,7 @@ export default {
       else if (i.customId === 'prev' && page > 0) page--;
 
       await interaction.editReply({
-        embeds: [generateEmbed(page)],
+        embeds: [await generateEmbed(page)],
         components: [getRow(page)],
       });
     });

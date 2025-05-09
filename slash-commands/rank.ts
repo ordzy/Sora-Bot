@@ -1,45 +1,52 @@
 import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
-  EmbedBuilder
+  EmbedBuilder,
+  User
 } from 'discord.js';
 import db from '../utils/db';
 
 export default {
   data: new SlashCommandBuilder()
     .setName('rank')
-    .setDescription("Shows your current level and XP."),
+    .setDescription("Shows a user's current level and XP.")
+    .addUserOption(option =>
+      option
+        .setName('user')
+        .setDescription('The user to check rank for')
+        .setRequired(false)
+    ),
 
   async execute(interaction: ChatInputCommandInteraction) {
-    const user = interaction.user;
     const guild = interaction.guild;
-
     if (!guild) {
       return interaction.reply({
         content: 'This command can only be used in a server.',
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
-    const key = `xp_${guild.id}_${user.id}`;
+    const targetUser = interaction.options.getUser('user') || interaction.user;
+    const key = `xp_${guild.id}_${targetUser.id}`;
     const data = await db.get(key);
 
     if (!data) {
       return interaction.reply({
-        content: "You haven't earned any XP yet.",
-        ephemeral: true
+        content: `<@${targetUser.id}> hasn't earned any XP yet.`,
+        ephemeral: true,
       });
     }
 
     const nextLevelXp = 5 * (data.level ** 2) + 50 * data.level + 100;
 
     const embed = new EmbedBuilder()
-      .setTitle(`${user.username}'s Rank`)
+      .setTitle(`${targetUser.username}'s Rank`)
       .setColor('#FF9500')
-      .setThumbnail(user.displayAvatarURL({ size: 512 }))
+      .setThumbnail(targetUser.displayAvatarURL({ size: 512 }))
       .addFields(
         { name: 'Level', value: `${data.level}`, inline: true },
-        { name: 'XP', value: `${data.xp} / ${nextLevelXp}`, inline: true }
+        { name: 'XP', value: `${data.xp} / ${nextLevelXp}`, inline: true },
+        { name: 'Total XP', value: `${data.totalXp}`, inline: true }
       )
       .setFooter({ text: `Keep chatting to level up!` });
 
