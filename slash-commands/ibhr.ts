@@ -17,12 +17,12 @@ const data = new SlashCommandBuilder()
   .addStringOption(option =>
     option.setName('hex')
       .setDescription('Hex color (e.g. #ff5733)')
-      .setRequired(true)
+      .setRequired(false)
   )
   .addAttachmentOption(option =>
     option.setName('image')
       .setDescription('Upload an image under 2MB (PNG/JPG)')
-      .setRequired(true)
+      .setRequired(false)
   )
   .addStringOption(option =>
     option.setName('name')
@@ -34,7 +34,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
   const roleId = idclass.roleIBH();
   const member = interaction.member as GuildMember;
   const guild = interaction.guild;
-
+  
   if (!guild || !member || !('roles' in member)) {
     return interaction.reply({ content: 'This command must be used in a server.', ephemeral: true });
   }
@@ -49,6 +49,13 @@ async function execute(interaction: ChatInputCommandInteraction) {
   const imageAttachment = interaction.options.getAttachment('image', true);
   const newName = interaction.options.getString('name', false);
 
+  if (!hexColor && !imageAttachment && !newName) {
+    return interaction.reply({
+      content: 'You must provide at least one option: hex color, image, or name.',
+      ephemeral: true,
+    });
+  }
+  
   if (imageAttachment.size > MAX_ICON_SIZE) {
     return interaction.reply({
       content: 'The image is too large lil bro, upload an image under 2MB. Supported formats: PNG, JPG.',
