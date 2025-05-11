@@ -4,7 +4,7 @@ import idclass from '../idclass';
 export default {
   name: 'cmd',
   description: 'Repeats a message.',
-  requiredRoles: [idclass.roleDev(), idclass.soraBotRole()],
+  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
 
   execute(message: Message, args: string[], client: Client) {
     const requiredRoles = this.requiredRoles;
@@ -16,6 +16,13 @@ export default {
     if (!hasRequiredRole) {
       return message.reply({ content: 'You do not have permission to use this command.' });
     }
+
+    const input = message.content.trim();
+const matches = input.match(/[\.\?](\w+)/g); // Matches both .cmd and ?cmd
+
+if (matches && matches.length > 1 && matches[0] === matches[1]) {
+  return message.reply("You can't run the same command inside itself.");
+}
 
     let channel = message.mentions.channels.first() as TextChannel | null;
     let text: string;

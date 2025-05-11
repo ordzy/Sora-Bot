@@ -7,17 +7,14 @@ export default {
     const restrictedChannelId = idclass.channelMR();
     const allowedRoles = [idclass.roleDev()];
 
-    // Ignore bot messages or unrelated channels
     if (message.author.bot || message.channel.id !== restrictedChannelId) return;
 
-    // Check if the user has an allowed role
     const hasPermission = message.member?.roles.cache.some(role =>
       allowedRoles.includes(role.id)
     );
 
     if (hasPermission) return;
 
-    // Allow only link-only messages
     const isLink =  /^(?:\/\/[^\s]+)/.test(message.content);
 
     if (!isLink) {

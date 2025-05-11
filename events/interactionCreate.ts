@@ -16,7 +16,6 @@ import {
     name: Events.InteractionCreate,
     async execute(interaction: Interaction, client: ExtendedClient) {
         try {
-        // Handle Slash Commands
         if (interaction.isChatInputCommand()) {
           const command = client.slashCommands.get(interaction.commandName);
           if (!command) return;
@@ -28,12 +27,11 @@ import {
               await interaction.reply({
                 content: 'Something went wrong while executing this command.',
                 ephemeral: true
-              }).catch(() => {}); // prevent Unknown Interaction error
+              }).catch(() => {}); 
             }
           }
         }
   
-        // Handle Buttons
         if (interaction.isButton()) {
           const button = interaction as ButtonInteraction;
   

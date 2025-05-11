@@ -16,7 +16,6 @@ export default {
   execute: async (message: Message, args: string[]) => {
     const member = message.member as GuildMember;
 
-    // Permission check
     if (!member.roles.cache.some(role => idclass.roleMods().includes(role.id))) {
       return message.reply({
         content: 'You do not have permission to use this command.',
@@ -24,7 +23,6 @@ export default {
       });
     }
 
-    // Argument validation
     if (!args.length || (isNaN(Number(args[0])) && !message.mentions.users.first())) {
       return message.reply({
         content: 'Invalid usage. Use `.purge <number>` or `.purge @User <number>`.',
@@ -47,7 +45,6 @@ export default {
       const currentTime = Date.now();
       const maxAge = 14 * 24 * 60 * 60 * 1000; // 14 days in ms
 
-      // Filter messages
       const filteredMessages = Array.from(
         messages
           .filter(msg =>
@@ -63,7 +60,6 @@ export default {
         return message.reply("This command can only be used in a text channel.");
       }
       
-      // Send log to modlog channel
       const modlogChannel = message.guild?.channels.cache.get(idclass.logChannel());
       if (
         !modlogChannel ||

@@ -44,10 +44,9 @@ async function execute(interaction: ChatInputCommandInteraction) {
     return interaction.reply({ content: 'Only members with the IBHR role can use this command.', ephemeral: true });
   }
 
-  const hexColor = interaction.options.getString('hex', true);
-  const formattedHex = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
-  const imageAttachment = interaction.options.getAttachment('image', true);
-  const newName = interaction.options.getString('name', false);
+  const hexColor = interaction.options.getString('hex');
+  const imageAttachment = interaction.options.getAttachment('image'); 
+  const newName = interaction.options.getString('name');
 
   if (!hexColor && !imageAttachment && !newName) {
     return interaction.reply({
@@ -55,37 +54,51 @@ async function execute(interaction: ChatInputCommandInteraction) {
       ephemeral: true,
     });
   }
-  
-  if (imageAttachment.size > MAX_ICON_SIZE) {
-    return interaction.reply({
-      content: 'The image is too large lil bro, upload an image under 2MB. Supported formats: PNG, JPG.',
-      ephemeral: true,
-    });
+
+  const roleEditData: any = {
+    reason: `IBHR role updated by ${member.user.tag}`,
+  };
+
+  if (hexColor) {
+    const formattedHex = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
+    roleEditData.color = formattedHex as ColorResolvable;
   }
 
-  const allowedTypes = ['image/png', 'image/jpeg'];
-  if (!allowedTypes.includes(imageAttachment.contentType || '')) {
-    return interaction.reply({
-      content: 'Invalid file type. Please upload a PNG or JPG image.',
-      ephemeral: true,
-    });
+  if (imageAttachment) {
+    if (imageAttachment.size > MAX_ICON_SIZE) {
+      return interaction.reply({
+        content: 'The image is too large lil bro, upload an image under 2MB. Supported formats: PNG, JPG.',
+        ephemeral: true,
+      });
+    }
+
+    const allowedTypes = ['image/png', 'image/jpeg'];
+    if (!allowedTypes.includes(imageAttachment.contentType || '')) {
+      return interaction.reply({
+        content: 'Invalid file type. Please upload a PNG or JPG image.',
+        ephemeral: true,
+      });
+    }
+
+    const response = await fetch(imageAttachment.url);
+    const iconBuffer = Buffer.from(await response.arrayBuffer());
+    roleEditData.icon = iconBuffer;
+  }
+
+  if (newName) {
+    roleEditData.name = newName;
   }
 
   try {
     const role = guild.roles.cache.get(roleId);
-    if (!role) return interaction.reply({ content: `Role with ID ${roleId} not found.`, ephemeral: true });
+    if (!role) {
+      return interaction.reply({ content: `Role with ID ${roleId} not found.`, ephemeral: true });
+    }
 
-    const response = await fetch(imageAttachment.url);
-    const iconBuffer = Buffer.from(await response.arrayBuffer());
+    await role.edit(roleEditData);
 
-    await role.edit({
-      color: formattedHex as ColorResolvable,
-      icon: iconBuffer,
-      name: newName || undefined,
-      reason: `IBHR role updated by ${member.user.tag}`,
-    });
-
-    let replyMsg = `Updated <@&${roleId}> role\nHex Color: \`${formattedHex}\``;
+    let replyMsg = `Updated <@&${roleId}> role`;
+    if (hexColor) replyMsg += `\nHex Color: \`${roleEditData.color}\``;
     if (newName) replyMsg += `\nNew Name: **${newName}**`;
 
     await interaction.reply({
@@ -101,5 +114,6 @@ async function execute(interaction: ChatInputCommandInteraction) {
     });
   }
 }
+
 
 export default { data, execute };

@@ -10,7 +10,7 @@ module.exports = {
      * @param {string[]} args
      */
     async execute(message: { member: { roles: { cache: any[]; }; }; reply: (arg0: { content?: string; allowedMentions?: { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; }; embeds?: any[]; }) => any; guild: { members: { fetch: (arg0: any) => any; }; name: any; channels: { cache: { get: (arg0: any) => any; }; }; }; channel: { send: (arg0: { content: string; allowedMentions: { parse: never[]; } | { parse: never[]; }; }) => any; }; author: { id: any; }; }, args: any[]) {
-        const requiredRoles = [idclass.roleDev()];
+        const requiredRoles = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
         const hasRequiredRole = message.member.roles.cache.some(role => requiredRoles.includes(role.id));
 
         if (!hasRequiredRole) {

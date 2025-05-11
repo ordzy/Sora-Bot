@@ -46,8 +46,7 @@ export default {
                 .setRequired(true)),
 
     async execute(interaction: ChatInputCommandInteraction) {
-        const roles = idclass
-        const allowedRoleIDs = [roles.roleDev()];
+        const allowedRoleIDs = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
         
         const member = interaction.member as GuildMember;
         if (!member.roles.cache.some(role => allowedRoleIDs.includes(role.id))) {

@@ -9,7 +9,7 @@ module.exports = {
      * @param {string[]} args
      */
     async execute(message: { member: { roles: { cache: any; }; }; reply: (arg0: { content: string; allowedMentions: { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; }; }) => any; guild: { members: { fetch: (arg0: any) => any; }; roles: { cache: { get: (arg0: any) => any; }; }; channels: { cache: { get: (arg0: string) => any; }; }; }; author: { id: any; }; }, args: string | any[]) {
-        const requiredRoles = [idclass.roleDev(), idclass.roleCranci()];
+        const requiredRoles = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
         const memberRoles = message.member?.roles?.cache;
 
         if (!memberRoles || !memberRoles.some((role: { id: string; }) => requiredRoles.includes(role.id))) {
@@ -26,7 +26,6 @@ module.exports = {
             });
         }
 
-        // Fetch member
         let targetMember;
         const userId = args[0].replace(/[<@!>]/g, '');
         try {
@@ -55,14 +54,14 @@ module.exports = {
             if (validRoles.length > 0) {
                 await targetMember.roles.add(validRoles.map(r => r.id));
                 await message.reply({
-                    content: `✅ Added roles to <@${targetMember.id}>: ${validRoles.map(r => r.name).join(', ')}`,
+                    content: `Added roles to <@${targetMember.id}>: ${validRoles.map(r => r.name).join(', ')}`,
                     allowedMentions: { parse: [] }
                 });
 
                 const logChannel = message.guild.channels.cache.get(idclass.logChannel());
                 if (logChannel?.isTextBased()) {
                     logChannel.send({
-                        content: `📝 <@${message.author.id}> added roles (${validRoles.map(r => r.name).join(', ')}) to <@${targetMember.id}>.`,
+                        content: `<@${message.author.id}> added roles (${validRoles.map(r => r.name).join(', ')}) to <@${targetMember.id}>.`,
                         allowedMentions: { parse: [] }
                     });
                 }

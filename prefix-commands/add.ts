@@ -5,14 +5,13 @@ import {
     ChannelType
 } from 'discord.js';
 import idclass from '../idclass';
-const Dev = idclass.roleDev();
 const LogChannel = idclass.logChannel();
 const RestrictedCategory = idclass.restrictedCategory();
 export default {
     name: 'add',
     description: 'Gives a user access to the current channel.',
     
-    requiredRoles: [Dev],
+    requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
 
     async execute(message: Message, args: string[]) {
         if (!message.guild || !message.member) return;

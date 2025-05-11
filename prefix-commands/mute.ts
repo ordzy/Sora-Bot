@@ -11,8 +11,7 @@ import {
     name: 'mute',
     description: 'Times out a user for a specified duration or removes the timeout if no duration is provided.',
     async execute(message: Message, args: string[]) {
-      // Permissions check
-      const requiredRoles = [idclass.roleDev()];
+      const requiredRoles = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
       const hasRequiredRole = message.member?.roles.cache.some(role =>
         requiredRoles.includes(role.id)
       );
@@ -26,7 +25,6 @@ import {
         return message.reply('Please mention a user to timeout or untimeout.');
       }
   
-      // Prevent muting devs
       const protectedRoles = [idclass.roleDev(), idclass.roleCranci(), idclass.rolePaul()];
       if (member.roles.cache.some(role => protectedRoles.includes(role.id))) {
         const embed = new EmbedBuilder()
@@ -85,7 +83,6 @@ import {
             }
           }, durationMs);
         } else {
-          // Remove timeout
           await member.timeout(null, reason);
           await message.reply({
             content: `<@${member.id}> has been __**UNMUTED**__`,
@@ -106,7 +103,6 @@ import {
     },
   };
   
-  // Helper to parse duration like "10m", "1h", etc.
   function parseDuration(duration: string): number | null {
     const regex = /^(\d+)([smhd])$/;
     const match = duration.match(regex);

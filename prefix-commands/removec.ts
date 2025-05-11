@@ -4,7 +4,7 @@ import idclass from '../idclass';
 export default {
   name: 'removec',
   description: 'Removes a user\'s access to the current channel.',
-  requiredRoles: [idclass.roleDev()],
+  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
 
   async execute(message: Message, args: string[]) {
     const hasRequiredRole = message.member?.roles.cache.some(role =>
@@ -28,7 +28,7 @@ export default {
     const channel = message.channel;
     if (!channel.isTextBased() || channel.type !== 0) return;
 
-    const restrictedCategories = [idclass.restrictedCategory()]; // replace with method if needed
+    const restrictedCategories = [idclass.restrictedCategory()]; 
 
     const isRestricted = restrictedCategories.includes(channel.parentId || '');
     if (isRestricted) {

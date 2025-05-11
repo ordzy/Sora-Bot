@@ -6,7 +6,7 @@ import {
     ButtonBuilder,
     ButtonStyle
 } from 'discord.js';
-import fetch from 'node-fetch';  // Make sure to install 'node-fetch'
+import fetch from 'node-fetch'; 
 import 'dotenv/config';
 
 export default {

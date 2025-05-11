@@ -3,7 +3,7 @@ import idclass from '../idclass';
 export default {
   name: 'ban',
   description: 'Bans a user from the server.',
-  requiredRoles: [idclass.roleDev()],
+  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
 
   async execute(message: Message, args: string[], _client: Client) {
     const requiredRoles = this.requiredRoles;
@@ -38,12 +38,11 @@ export default {
         });
       }
 
-      // Prevent banning RoleDev users
       const embed = new EmbedBuilder()
         .setColor('#FFA500')
         .setDescription('You cannot ban peak devs <:DogHush:1331679185072029798>');
 
-      if (user.roles.cache.has(idclass.roleDev())) {
+      if (user.roles.cache.some(role => idclass.roleMods().includes(role.id))) {
         return message.reply({ embeds: [embed] });
       }
 
@@ -55,7 +54,6 @@ export default {
         });
       }
 
-      // Try to DM the user
       try {
         await user.send(`You have been __**BANNED**__ from **${message.guild?.name}** for the following reason: ${reason}`);
       } catch (dmError) {
@@ -70,7 +68,6 @@ export default {
 
       await user.ban({ reason });
 
-      // Confirmation & logs
       await message.reply({
         content: `https://tenor.com/view/persona-3-reload-episode-aigis-persona-persona-3-persona-3-reload-joker-persona-3-reload-joker-fight-gif-12722693221088524996`,
         allowedMentions: { parse: [] }

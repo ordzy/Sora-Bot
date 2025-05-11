@@ -30,10 +30,14 @@ class IDClass {
   }
 
   roleMods() {
-    return isTest
-      ? ["1355635957482655812", "1355635957532983316", "1355635957532983318"]
-      : ["1293431333686612008", "1346527970801618974", "1334894580428050483"];
-  }
+  return [
+    this.roleDev(),
+    this.roleCommander(),
+    this.rolePaul(),
+    this.roleCranci(),
+    this.soraBotRole()
+  ];
+}
 
   roleIMP() {
     return isTest
@@ -46,11 +50,11 @@ class IDClass {
   }
 
   soraBotRole() {
-    return isTest ? "1355640963313172593" : "1333527326000152689";
+    return isTest ? "1355640963313172593" : "1367184950326988823";
   }
 
   roleDonator() {
-    return "1311939595096821760"; // same on both
+    return "1311939595096821760";
   }
 
   roleIBH() {
@@ -151,7 +155,7 @@ roleSun() {
   }
 }
 
-//role/channelNAME() {
+// role/channelNAME() {
 //  return isTest ? "TEST_ROLE/CHANNEL_ID" : "MAIN_ROLE_CHANNEL_ID";
 //}
 

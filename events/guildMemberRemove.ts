@@ -15,7 +15,7 @@ const event: Event = {
     const channel = member.guild.channels.cache.get(idclass.channelJLG());
     if (channel?.isTextBased()) {
       channel.send({
-        content: `<@${member.user.id}> left the server.<:NOOO:1362542608202600519>\nStored roles: ${roleIds.length ? roleIds.map(id => `<@&${id}>`).join(', ') : 'None'}`,
+        content: `**${member.displayName}** left the server.<:NOOO:1362542608202600519>\nStored roles: ${roleIds.length ? roleIds.map(id => `<@&${id}>`).join(', ') : 'None'}`,
         allowedMentions: { parse: [] }
       });
     }

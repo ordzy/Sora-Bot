@@ -18,11 +18,9 @@ import {
         return message.reply('Please provide a user ID or mention.');
       }
   
-      // Extract user ID from mention or plain input
       const userId = input.replace(/[<@!>]/g, '');
   
       try {
-        // Try fetching user
         const user: User = await client.users.fetch(userId);
         const userProfile = await user.fetch();
   

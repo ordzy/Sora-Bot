@@ -5,7 +5,7 @@ const roles = idclass
 export default {
   name: 'warn',
   description: 'Issues a warning to a user.',
-  requiredRoles: [roles.roleDev()],
+  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
   protectedRoles: [
     roles.roleDev(),
     roles.roleHelper(),
@@ -61,13 +61,11 @@ export default {
       });
     }
 
-    // Notify in channel
     await message.reply({
       content: `<@${user.id}> has been **__WARNED__**`,
       allowedMentions: { parse: [] }
     });
 
-    // Log the action
     const logChannel = message.guild?.channels.cache.get(roles.logChannel()) as TextChannel;
     if (logChannel) {
       await logChannel.send({
@@ -76,7 +74,6 @@ export default {
       });
     }
 
-    // DM the warned user
     user.send(`You have been **__WARNED__** in **${message.guild?.name}** for: **${reason}**`)
       .catch(async () => {
         if (logChannel) {

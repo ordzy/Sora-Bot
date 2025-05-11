@@ -10,7 +10,7 @@ import {
   export default {
     name: 'softban',
     description: 'Softbans a user (bans, deletes messages, DMs an invite, then unbans).',
-    requiredRoles: [idclass.roleDev()],
+    requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
   
     async execute(message: Message, args: string[], client: Client) {
       const hasRequiredRole = message.member?.roles.cache.some(role =>

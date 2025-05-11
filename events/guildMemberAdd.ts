@@ -31,7 +31,7 @@ const botHighestRolePosition = member.guild.members.me.roles.highest.position;
     const channel = member.guild.channels.cache.get(idclass.channelJLG());
     if (channel?.isTextBased()) {
       channel.send({
-        content: `<@${member.user.id}> joined the server.<a:KaedeSpin:1359178579598114846>\nRestored roles: ${restoredRoles.length ? restoredRoles.map(id => `<@&${id}>`).join(', ') : 'None'}`,
+        content: `**${member.displayName}** joined the server.<a:KaedeSpin:1359178579598114846>\nRestored roles: ${restoredRoles.length ? restoredRoles.map(id => `<@&${id}>`).join(', ') : 'None'}`,
         allowedMentions: { parse: [] }
       });
     }
