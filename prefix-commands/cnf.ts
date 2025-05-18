@@ -44,14 +44,22 @@ export default {
     }
 
     const buttons = session.roles.map((r: any) => {
-      const btn = new ButtonBuilder()
-        .setLabel(r.label)
-        .setCustomId(`toggle_${r.roleId}`)
-        .setStyle(ButtonStyle.Primary);
+  const btn = new ButtonBuilder()
+    .setLabel(r.label)
+    .setCustomId(`toggle_${r.roleId}`)
+    .setStyle(ButtonStyle.Primary);
 
-      if (r.emoji) btn.setEmoji(r.emoji);
-      return btn;
-    });
+  if (r.emoji) {
+    try {
+      btn.setEmoji(r.emoji);
+    } catch (err) {
+      console.warn(`Failed to set emoji for role ${r.roleId}:`, err);
+    }
+  }
+
+  return btn;
+});
+
 
     const rows = [];
     for (let i = 0; i < buttons.length; i += 5) {
