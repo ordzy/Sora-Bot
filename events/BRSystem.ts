@@ -2,9 +2,6 @@ import {
   Message,
   Events,
   ChannelType,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
 } from 'discord.js';
 import db from '../utils/db';
 
@@ -47,41 +44,24 @@ export default {
       }
 
       case 'askCustomMessage': {
-  session.customMessage = content.toLowerCase() === 'default' ? null : content;
-  session.step = 'askChannel';
-  await db.set(sessionKey, session);
-  return message.reply('Now, please **mention the channel** where the role buttons should be posted:');
-}
+        session.customMessage = content.toLowerCase() === 'default' ? null : content;
+        session.step = 'askChannel';
+        await db.set(sessionKey, session);
+        return message.reply('Now, please **mention the channel** where the role buttons should be posted:');
+      }
 
-case 'askChannel': {
-  const channel = message.mentions.channels.first();
-  if (!channel || channel.type !== ChannelType.GuildText || !('send' in channel)) {
-    return message.reply('Please mention a valid text channel.');
-  }
+      case 'askChannel': {
+        const channel = message.mentions.channels.first();
+        if (!channel || channel.type !== ChannelType.GuildText || !('send' in channel)) {
+          return message.reply('Please mention a valid text channel.');
+        }
 
-  const buttons = session.roles.map((r: any) => {
-    const btn = new ButtonBuilder()
-      .setLabel(r.label)
-      .setCustomId(`toggle_${r.roleId}`)
-      .setStyle(ButtonStyle.Primary);
+        session.channelId = channel.id;
+        session.step = 'readyToPost';
+        await db.set(sessionKey, session);
 
-    if (r.emoji) btn.setEmoji(r.emoji);
-    return btn;
-  });
-
-  const rows = [];
-  for (let i = 0; i < buttons.length; i += 5) {
-    rows.push(new ActionRowBuilder<ButtonBuilder>().addComponents(buttons.slice(i, i + 5)));
-  }
-
-  await channel.send({
-    content: session.customMessage || 'Click below to assign/remove the following roles:',
-    components: rows,
-  });
-
-  await db.delete(sessionKey);
-  return message.reply('Selectable role message posted successfully!');
-}
+        return message.reply('Channel saved! Now type `.cnf` again to post the role buttons.');
+      }
 
       default:
         return;
