@@ -1,10 +1,9 @@
 import {
   Message,
-  ChannelType,
+  TextChannel,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  TextChannel,
 } from 'discord.js';
 import db from '../utils/db';
 import idclass from '../idclass';
@@ -29,23 +28,19 @@ export default {
     const sessionKey = `ssr-session-${message.author.id}`;
     const session = await db.get(sessionKey);
 
-    if (!session || session.step !== 'waitConfirm') {
+    if (!session || (session.step !== 'waitConfirm' && session.step !== 'readyToPost')) {
       return message.reply('No session found or not ready to confirm.');
     }
 
-    if (!session.customMessage) {
+    if (session.step === 'waitConfirm') {
+      // Move forward in setup
       await db.set(sessionKey, { ...session, step: 'askCustomMessage' });
       return message.reply('Please enter a custom message title (or type `default` to use the default one):');
     }
 
-    if (!session.channelId) {
-      await db.set(sessionKey, { ...session, step: 'askChannel' });
-      return message.reply('Now, please **mention the channel** where the role buttons should be posted:');
-    }
-
-    const channel = message.guild?.channels.cache.get(session.channelId) as TextChannel;
-    if (!channel || channel.type !== ChannelType.GuildText || !('send' in channel)) {
-      return message.reply('Stored channel is invalid. Please run the process again.');
+    const targetChannel = message.guild?.channels.cache.get(session.channelId) as TextChannel;
+    if (!targetChannel || !targetChannel.send) {
+      return message.reply('The saved channel could not be found or is invalid.');
     }
 
     const buttons = session.roles.map((r: any) => {
@@ -63,7 +58,7 @@ export default {
       rows.push(new ActionRowBuilder<ButtonBuilder>().addComponents(buttons.slice(i, i + 5)));
     }
 
-    await channel.send({
+    await targetChannel.send({
       content: session.customMessage || 'Click below to assign/remove the following roles:',
       components: rows,
     });
