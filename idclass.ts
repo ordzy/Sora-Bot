@@ -25,6 +25,10 @@ class IDClass {
     return isTest ? "1355635959860826348" : "1353519265684127744";
   }
 
+   welcomeChannelId() {
+    return isTest ? "1355635958401470526" : "1293547438283558935";
+  }
+  
   restrictedCategory() {
     return isTest ? "1355635959676538930" : "1293432337740075118";
   }
