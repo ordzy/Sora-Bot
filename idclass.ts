@@ -26,11 +26,11 @@ class IDClass {
   }
 
    welcomeChannelId() {
-    return isTest ? "1373517403643707464" : "1293547438283558935";
+    return isTest ? "1355635958401470526" : "1293547438283558935";
   }
   
   restrictedCategory() {
-    return isTest ? "1355635958401470526" : "1293432337740075118";
+    return isTest ? "1355635959676538930" : "1293432337740075118";
   }
 
   roleMods() {
