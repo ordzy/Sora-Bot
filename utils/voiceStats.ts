@@ -1,10 +1,19 @@
 import { Client, ChannelType, TextChannel, Message } from 'discord.js';
 import fetch from 'node-fetch';
-import idclass from '../idclass';
+import idclass from './idclass';
+import { config } from 'dotenv';
+config();
 
 const API_URL = 'https://sora.jm26.net/api/stats.json';
+const isTest = process.env.isTest === 'true';
 
 export default async function setupVoiceStats(client: Client) {
+  // Skip execution if in test mode
+  if (isTest) {
+    console.log('[VoiceStats] Skipping voice stats setup in test environment');
+    return;
+  }
+
   let lastLogMessage: Message | null = null; // In-memory tracker
 
   async function updateChannel() {

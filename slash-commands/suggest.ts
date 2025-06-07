@@ -10,7 +10,7 @@ import {
     ModalSubmitInteraction
   } from 'discord.js';
   
-  import idclass from '../idclass';
+  import idclass from '../utils/idclass';
   import { QuickDB } from 'quick.db';
   const db = new QuickDB();
   
@@ -20,7 +20,9 @@ import {
     .addStringOption(option =>
       option.setName('name').setDescription('Module name').setRequired(true))
     .addStringOption(option =>
-      option.setName('link').setDescription('Module link').setRequired(true))
+      option.setName('link')
+      .setDescription('Module link (must start with https://)')
+      .setRequired(true))
     .addStringOption(option =>
       option.setName('language').setDescription('Language').setRequired(true))
     .addStringOption(option =>
@@ -32,6 +34,15 @@ import {
         )
     );
   
+  function isValidUrl(url: string): boolean {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+  
   export async function execute(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ flags: 64 }); // 64 = ephemeral flag
   
@@ -39,6 +50,15 @@ import {
     const link = interaction.options.getString('link', true);
     const language = interaction.options.getString('language', true);
     const type = interaction.options.getString('type', true);
+  
+    // URL validation
+    if (!isValidUrl(link)) {
+      return interaction.editReply({ 
+        content: 'Please provide a valid URL that starts with `https://`\n' +
+                'Example: `https://example.com`\n\n' +
+                'Invalid URL format provided: `' + link + '`'
+      });
+    }
   
     const suggestionChannel = interaction.guild?.channels.cache.get(idclass.channelMRC());
     const publicChannel = interaction.guild?.channels.cache.get(idclass.channelMRC2());

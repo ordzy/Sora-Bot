@@ -5,9 +5,8 @@ import {
   DMChannel,
   NewsChannel
 } from 'discord.js';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 import setupVoiceStats from '../utils/voiceStats';
-import syncServers from '../utils/syncTemplate'; // Import sync function
 
 const startTime = Date.now();
 
@@ -35,10 +34,7 @@ export default {
       );
     }
 
-    await syncServers(client);
 
-    setInterval(async () => {
-      await syncServers(client);
-    }, 60 * 60 * 1000); // every 1 hour
+    
   }
 };

@@ -1,6 +1,28 @@
-import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, version as discordJsVersion } from 'discord.js';
 import os from 'os';
-import { version as discordJsVersion } from 'discord.js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+async function getGitInfo() {
+    try {
+        const { stdout: branch } = await execAsync('git rev-parse --abbrev-ref HEAD');
+        const { stdout: lastCommit } = await execAsync('git log -1 --format=%s');
+        const { stdout: commitHash } = await execAsync('git rev-parse --short HEAD');
+        return {
+            branch: branch.trim(),
+            lastCommit: lastCommit.trim(),
+            commitHash: commitHash.trim()
+        };
+    } catch (error) {
+        return {
+            branch: 'Unknown',
+            lastCommit: 'Unknown',
+            commitHash: 'Unknown'
+        };
+    }
+}
 
 function getCpuUsage(): Promise<string> {
     return new Promise((resolve) => {
@@ -31,49 +53,104 @@ function getCpuUsage(): Promise<string> {
     });
 }
 
+function formatBytes(bytes: number): string {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 Byte';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
+}
+
+function formatUptime(uptime: number): string {
+    const totalSeconds = Math.floor(uptime / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
+    
+    return parts.join(' ');
+}
+
 export default {
     data: new SlashCommandBuilder()
         .setName('info')
-        .setDescription('Displays bot information, uptime, and other details.'),
+        .setDescription('Displays detailed bot information and system stats.'),
 
     async execute(interaction: ChatInputCommandInteraction) {
+        await interaction.deferReply();
         const bot = interaction.client;
 
-        const totalSeconds = Math.floor(bot.uptime! / 1000);
-        const days = Math.floor(totalSeconds / 86400);
-        const hours = Math.floor((totalSeconds % 86400) / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        const uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-        const totalMem = os.totalmem() / 1024 / 1024;
-        const freeMem = os.freemem() / 1024 / 1024;
+        // System stats
+        const totalMem = os.totalmem();
+        const freeMem = os.freemem();
         const usedMem = totalMem - freeMem;
-        const memoryUsage = `${usedMem.toFixed(0)} MB / ${totalMem.toFixed(0)} MB`;
-
+        const memoryUsage = `${formatBytes(usedMem)} / ${formatBytes(totalMem)}`;
         const cpuUsage = await getCpuUsage();
+        
+        // Git info
+        const gitInfo = await getGitInfo();
 
-        const developer = 'Sora Team';
-        const hosted = 'CloudPanel Server';
-
-        const embed = new EmbedBuilder()
-            .setTitle('Sora Bot Info')
-            .setDescription('Here is some useful information about me.')
+        const mainEmbed = new EmbedBuilder()
+            .setTitle('Sora Bot Information')
+            .setDescription('A powerful Discord bot built with TypeScript')
             .addFields(
-                { name: 'Uptime', value: uptime, inline: true },
-                { name: 'Discord.JS Version', value: `v${discordJsVersion}`, inline: true },
-                { name: 'Hosted On', value: hosted, inline: true },
-                { name: 'Developed By', value: developer, inline: true },
-                { name: 'RAM Usage', value: memoryUsage, inline: true },
-                { name: 'CPU Usage', value: cpuUsage, inline: true },
+                { 
+                    name: 'Bot Status',
+                    value: [
+                        `**Uptime:** ${formatUptime(bot.uptime!)}`,
+                        `**Latency:** ${Math.round(bot.ws.ping)}ms`,
+                        `**Memory:** ${memoryUsage}`,
+                        `**CPU Usage:** ${cpuUsage}`
+                    ].join('\n'),
+                    inline: true
+                },
                 {
-                    name: 'Sora Bot is Open Source!',
-                    value: 'https://github.com/bshar1865/Sora-Bot'
+                    name: 'System Info',
+                    value: [
+                        `**OS:** ${os.platform()} ${os.release()}`,
+                        `**Architecture:** ${os.arch()}`,
+                        `**CPU Cores:** ${os.cpus().length}`,
+                        `**Node.js:** ${process.version}`
+                    ].join('\n'),
+                    inline: true
+                },
+                {
+                    name: 'Technical Stack',
+                    value: [
+                        `**Language:** TypeScript`,
+                        `**Runtime:** Node.js ${process.version}`,
+                        `**Discord.js:** v${discordJsVersion}`,
+                        `**Database:** better-sqlite3`
+                    ].join('\n'),
+                    inline: true
+                },
+                {
+                    name: 'Repository Info',
+                    value: [
+                        `**Branch:** ${gitInfo.branch}`,
+                        `**Latest Commit:** ${gitInfo.lastCommit}`,
+                        `**Commit Hash:** ${gitInfo.commitHash}`,
+                        `**Repository:** [GitHub](https://github.com/bshar1865/Sora-Bot)`
+                    ].join('\n')
+                },
+                {
+                    name: 'Credits',
+                    value: [
+                        '**Developer:** Sora Team',
+                        '**Hosted On:** CloudPanel Server',
+                        '**Support:** [Star us on GitHub!](https://github.com/bshar1865/Sora-Bot)'
+                    ].join('\n')
                 }
             )
             .setColor('#ff9500')
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({ text: 'Use /help to see available commands' });
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [mainEmbed] });
     },
 };

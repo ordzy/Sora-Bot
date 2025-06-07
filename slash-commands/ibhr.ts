@@ -5,7 +5,7 @@ import {
   AttachmentBuilder,
   ColorResolvable,
 } from 'discord.js';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 import { GuildMember } from 'discord.js';
 import fetch from 'node-fetch';
 

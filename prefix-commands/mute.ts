@@ -5,7 +5,7 @@ import {
     TextChannel,
     ChannelType,
   } from 'discord.js';
-  import idclass from '../idclass';
+  import idclass from '../utils/idclass';
 
   module.exports = {
     name: 'mute',

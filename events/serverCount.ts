@@ -1,9 +1,18 @@
 import { GuildMember, VoiceChannel } from 'discord.js';
-import { ExtendedClient } from '../utils/ExtendedClient'; 
+import { ExtendedClient } from '../utils/ExtendedClient';
+import { config } from 'dotenv';
+config();
+
+const isTest = process.env.isTest === 'true';
 
 export default {
     name: 'ready',
     async execute(client: ExtendedClient) {
+        // Skip execution if in test mode
+        if (isTest) {
+            console.log('[ServerCount] Skipping server count updates in test environment');
+            return;
+        }
 
         const guildId = '1293430817841741899'; 
         const channelId = '1366451279412465785'; 

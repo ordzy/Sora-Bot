@@ -4,7 +4,7 @@ import {
     GuildMember,
     ChannelType
 } from 'discord.js';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 const LogChannel = idclass.logChannel();
 const RestrictedCategory = idclass.restrictedCategory();
 export default {

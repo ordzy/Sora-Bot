@@ -1,6 +1,6 @@
 import { Client, Message } from 'discord.js';
 import db from '../utils/db';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 const cooldown = new Set();
 

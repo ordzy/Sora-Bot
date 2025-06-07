@@ -6,19 +6,15 @@ import {
     REST,
     Routes,
     Partials,
+    ClientOptions
 } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
+import { Command, Event } from './types';
 import './utils/errorLogger';
 
-// Extend Discord Client with custom properties
-interface ExtendedClient extends Client {
-    prefixCommands: Collection<string, any>;
-    slashCommands: Collection<string, any>;
-}
-
-// Create the bot client
-export const client = new Client({
+// Client configuration
+const clientConfig: ClientOptions = {
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -26,60 +22,129 @@ export const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers
     ],
-    partials: [Partials.Channel],
-}) as ExtendedClient;
+    partials: [Partials.Channel]
+};
 
-// Add command collections
+// Extend Discord Client with custom properties
+interface ExtendedClient extends Client {
+    prefixCommands: Collection<string, Command>;
+    slashCommands: Collection<string, Command>;
+}
+
+// Create the bot client
+export const client = new Client(clientConfig) as ExtendedClient;
+
+// Initialize collections
 client.prefixCommands = new Collection();
 client.slashCommands = new Collection();
 
-async function init() {
-    try {
-        // Load Prefix Commands
-        const prefixCommandFiles = fs.readdirSync('./prefix-commands').filter(file => file.endsWith('.ts'));
-        for (const file of prefixCommandFiles) {
-            const command = await import(`./prefix-commands/${file}`);
+async function loadPrefixCommands(): Promise<void> {
+    const commandsPath = './prefix-commands';
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
+    
+    console.log('Loading prefix commands...');
+    for (const file of commandFiles) {
+        try {
+            const command = await import(`${commandsPath}/${file}`);
             client.prefixCommands.set(command.default.name, command.default);
+        } catch (error) {
+            console.error(`Error loading prefix command ${file}:`, error);
         }
+    }
+    console.log(`Loaded ${client.prefixCommands.size} prefix commands!`);
+}
 
-        // Load Slash Commands
-        const slashCommands = [];
-        const slashCommandFiles = fs.readdirSync('./slash-commands').filter(file => file.endsWith('.ts'));
-        for (const file of slashCommandFiles) {
-            const command = await import(`./slash-commands/${file}`);
+async function loadSlashCommands(): Promise<Command[]> {
+    const commands: Command[] = [];
+    const commandsPath = './slash-commands';
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
+    
+    console.log('Loading slash commands...');
+    for (const file of commandFiles) {
+        try {
+            const command = await import(`${commandsPath}/${file}`);
             client.slashCommands.set(command.default.data.name, command.default);
-            slashCommands.push(command.default.data.toJSON());
+            commands.push(command.default.data.toJSON());
+        } catch (error) {
+            console.error(`Error loading slash command ${file}:`, error);
         }
+    }
+    console.log(`Loaded ${commands.length} slash commands!`);
+    return commands;
+}
 
-        // Load Events
-        const eventFiles = fs.readdirSync(path.join(__dirname, 'events')).filter(file => file.endsWith('.ts'));
-        for (const file of eventFiles) {
-            const event = await import(path.join(__dirname, 'events', file));
+async function loadEvents(): Promise<void> {
+    const eventsPath = path.join(__dirname, 'events');
+    const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.ts'));
+    
+    console.log('Loading events...');
+    for (const file of eventFiles) {
+        try {
+            const event = await import(path.join(eventsPath, file)) as { default: Event };
+            const listener = (...args: any[]) => event.default.execute(...args, client);
+            
             if (event.default.once) {
-                client.once(event.default.name, (...args) => event.default.execute(...args, client));
+                client.once(event.default.name, listener);
             } else {
-                client.on(event.default.name, (...args) => event.default.execute(...args, client));
+                client.on(event.default.name, listener);
             }
+        } catch (error) {
+            console.error(`Error loading event ${file}:`, error);
         }
+    }
+    console.log(`Loaded ${eventFiles.length} events!`);
+}
 
-        // Check if tokens exist
-        if (!process.env.LoginID || !process.env.CLIENT_ID) {
-            throw new Error('Missing CLIENT_ID or LoginID in .env!');
-        }
+async function registerSlashCommands(commands: Command[]): Promise<void> {
+    if (!process.env.LoginID || !process.env.CLIENT_ID) {
+        throw new Error('Missing CLIENT_ID or LoginID in .env!');
+    }
 
-        // Register Slash Commands
-        const rest = new REST({ version: '10' }).setToken(process.env.LoginID);
-        console.log('Refreshing global application (/) commands...');
-        await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: slashCommands });
-        console.log('Successfully reloaded application (/) commands.');
-
-        // Now login
-        await client.login(process.env.LoginID);
+    const rest = new REST({ version: '10' }).setToken(process.env.LoginID);
+    
+    try {
+        console.log('Registering slash commands...');
+        await rest.put(
+            Routes.applicationCommands(process.env.CLIENT_ID),
+            { body: commands }
+        );
+        console.log('Successfully registered slash commands!');
     } catch (error) {
-        console.error('Fatal error during init():', error);
+        console.error('Error registering slash commands:', error);
+        throw error;
     }
 }
 
+async function init() {
+    try {
+        console.log('\nInitializing Sora Bot...\n');
+        
+        // Load all commands and events
+        await loadPrefixCommands();
+        const slashCommands = await loadSlashCommands();
+        await loadEvents();
+        
+        // Register slash commands
+        await registerSlashCommands(slashCommands);
+        
+        // Login
+        await client.login(process.env.LoginID);
+        console.log('\nSora Bot is ready to serve!\n');
+    } catch (error) {
+        console.error('Fatal error during initialization:', error);
+        process.exit(1);
+    }
+}
+
+// Handle process errors
+process.on('unhandledRejection', (error) => {
+    console.error('Unhandled promise rejection:', error);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught exception:', error);
+    process.exit(1);
+});
 
 init();
 

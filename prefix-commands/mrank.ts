@@ -1,7 +1,7 @@
 import { Message, EmbedBuilder, AttachmentBuilder } from "discord.js";
 import db from "../utils/db";
 import Canvas, { SKRSContext2D } from "@napi-rs/canvas";
-import idclass from "../idclass";
+import idclass from "../utils/idclass";
 
 // Reuse helper functions from rank.ts
 function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {

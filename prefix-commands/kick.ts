@@ -1,4 +1,4 @@
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 import { EmbedBuilder } from 'discord.js';
 
 module.exports = {

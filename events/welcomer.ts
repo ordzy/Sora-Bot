@@ -1,6 +1,6 @@
 import { EmbedBuilder, Events, GuildMember, AttachmentBuilder, TextChannel } from 'discord.js';
 import Canvas from '@napi-rs/canvas';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 let toggle = 0;
 

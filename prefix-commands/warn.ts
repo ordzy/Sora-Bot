@@ -1,5 +1,5 @@
 import { Message, GuildMember, EmbedBuilder, TextChannel } from 'discord.js';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 const roles = idclass
 
 export default {

@@ -1,4 +1,4 @@
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 module.exports = {
     name: 'giver',

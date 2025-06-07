@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import db from '../utils/db';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 export default {
   name: 'ssr',

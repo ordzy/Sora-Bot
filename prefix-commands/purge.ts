@@ -6,7 +6,7 @@ import {
   ChannelType,
   User
 } from 'discord.js';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 export default {
   name: 'purge',

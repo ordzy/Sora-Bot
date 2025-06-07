@@ -9,7 +9,7 @@ import {
     TextChannel,
     GuildMember
 } from 'discord.js';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 export default {
     data: new SlashCommandBuilder()

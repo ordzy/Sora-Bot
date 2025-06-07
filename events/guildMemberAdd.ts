@@ -1,7 +1,7 @@
 import { GuildMember, Events } from 'discord.js';
 import { Event } from '../types';
 import db from '../utils/db';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 const event: Event = {
   name: Events.GuildMemberAdd,

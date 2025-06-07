@@ -1,5 +1,5 @@
 import { Message, GuildMember, TextChannel, PermissionFlagsBits } from 'discord.js';
-import idclass from '../idclass';
+import idclass from '../utils/idclass';
 
 export default {
   name: 'removec',
