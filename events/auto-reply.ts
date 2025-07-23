@@ -126,7 +126,7 @@ const baseResponses: BaseAutoResponse[] = [
       "Ensure you're using the latest version of **Sora** from the **#installation** channel and that your modules are updated. You can enable auto-updates in settings.",
       "Some modules may be geo-restricted. Try using a VPN or a DNS like `1.1.1.1` for better results."
     ],
-    color: "#DC143C",
+    color: "Random",
     footer: "Module Troubleshooting"
   },
   {
@@ -201,7 +201,7 @@ const baseResponses: BaseAutoResponse[] = [
       "download option doesn't work"
     ],
     reply: "If downloads aren't working, look for the ☁️ cloud symbol in the module library. Only modules with this symbol support downloads.",
-    color: "#1E90FF",
+    color: "Random",
     footer: "Download Issues"
   },
   {
@@ -231,7 +231,7 @@ const baseResponses: BaseAutoResponse[] = [
       "Working modules change often. For anime, try `Hianime`, `Anicrush`, `Miruro`, or `Aniwave (clone)`.",
       "For movies or shows, try `XPrime`, `Myflixer`, or `Flickystream`. Check community feedback for the latest updates!"
     ],
-    color: "#32CD32",
+    color: "Random",
     footer: "Module Recommendations"
   }
 ];
@@ -258,7 +258,7 @@ export default function handleAutoReply(message: Message): void {
         : entry.reply;
 
       const embed = new EmbedBuilder()
-        .setColor(entry.color ?? "#FFA500")
+        .setColor("Random")
         .setDescription(replyText)
         .setTimestamp();
 
@@ -267,7 +267,6 @@ export default function handleAutoReply(message: Message): void {
       }
 
       message.reply({ embeds: [embed] });
-      console.log(`Auto-reply triggered by: "${message.content}"`);
       break;
     }
   }
