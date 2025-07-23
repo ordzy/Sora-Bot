@@ -251,11 +251,13 @@ const responses: AutoResponse[] = [
       "videos wont start",
       "videos dont start"
     ]),
+
     reply: [
-      "Before asking, please make sure to read the **#faq** channel — especially the *Getting Support* section.",
-      "Ensure you're using the latest version of **Sora** from the **#installation** channel and that your modules are updated. You can enable auto-updates in settings.",
+  `Before asking, please make sure to read the <#1304138599880593489> channel(s) — especially the *Getting Support* section.`,
+  `Ensure you're using the latest version of **Sora** from <#1353008267797860402> channel(s) and that your modules are updated. You can enable auto-updates in settings.`,
       "Some modules may be geo-restricted. Try using a VPN or a DNS like `1.1.1.1` for better results."
     ],
+
     color: "Random",
     footer: "Module Troubleshooting",
     priority: 10
