@@ -1,4 +1,5 @@
 import { Message, EmbedBuilder } from 'discord.js';
+import idclass from '../utils/idclass'; // adjust the path if needed
 
 interface AutoResponse {
   wordGroups: string[][]; // Array of word combinations (3-5 words each)
@@ -762,7 +763,12 @@ export function refreshTriggersCache(): void {
 // Main handler function
 export default async function handleAutoReply(message: Message): Promise<void> {
   const messageWords = extractWords(message.content);
-  
+
+  if (message.channelId !== idclass.channelSupport()) return;
+
+
+    if (message.member?.roles?.cache.some((role) => idclass.roleMods2().includes(role.id))) return;
+
   // Skip if message is too short
   if (messageWords.length < 2) return;
 

@@ -43,6 +43,20 @@ class IDClass {
   ];
 }
 
+  roleMods2() {
+  return [
+    this.roleDev(),
+    this.roleCommander(),
+    this.rolePaul(),
+    this.roleCranci(),
+    this.soraBotRole(),
+    this.roleContributor(),
+    this.roleDesigner(),
+    this.roleHelper(),
+    this.roleModuleCreator(),
+  ];
+}
+
   roleIMP() {
     return isTest
       ? ["1355635957482655808", "1355635957482655806", "1355635957482655807"]
@@ -152,6 +166,10 @@ roleSun() {
  
   channelJLG() {
     return isTest ? "1362495682371387576" : "1362495755310334042";
+  }
+
+  channelSupport() {
+    return isTest ? "1355635958795731078" : "1293432770198110250";
   }
  
   VCTotal() {
