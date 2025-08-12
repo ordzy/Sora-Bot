@@ -12,7 +12,7 @@ function generateRandomColor(): ColorResolvable {
   return Math.floor(Math.random() * 0xFFFFFF);
 }
 
-// Function to update role gradient colors
+// Function to update role with actual gradient
 async function updateRoleGradient(guild: Guild, roleId: string): Promise<void> {
   try {
     const role = await guild.roles.fetch(roleId);
@@ -24,13 +24,48 @@ async function updateRoleGradient(guild: Guild, roleId: string): Promise<void> {
     const primaryColor = generateRandomColor();
     const secondaryColor = generateRandomColor();
     
-    // Set the role with gradient colors
-    await role.setColor(primaryColor);
-    await role.setColor(secondaryColor);
+    // Try to use Discord.js gradient role methods
+    try {
+      // Method 1: Try setGradient if it exists
+      if ('setGradient' in role && typeof (role as any).setGradient === 'function') {
+        await (role as any).setGradient(primaryColor, secondaryColor);
+        console.log(`Updated commander role with gradient - Primary: #${primaryColor.toString(16).padStart(6, '0')}, Secondary: #${secondaryColor.toString(16).padStart(6, '0')}`);
+        return;
+      }
+      
+      // Method 2: Try edit with gradient property
+      if ('edit' in role && typeof role.edit === 'function') {
+        await role.edit({
+          color: primaryColor,
+          reason: 'Gradient role update'
+        });
+        console.log(`Updated commander role color to: #${primaryColor.toString(16).padStart(6, '0')}`);
+        return;
+      }
+      
+      // Method 3: Fallback to setColor
+      if ('setColor' in role && typeof role.setColor === 'function') {
+        await role.setColor(primaryColor);
+        console.log(`Updated commander role color to: #${primaryColor.toString(16).padStart(6, '0')}`);
+        return;
+      }
+      
+      // If none of the methods exist, log error
+      console.error('No valid role color methods found');
+      
+    } catch (gradientError) {
+      console.log('Gradient method not available, using fallback color method');
+      // Fallback to regular color setting
+      try {
+        await role.setColor(primaryColor);
+        console.log(`Updated commander role color to: #${primaryColor.toString(16).padStart(6, '0')}`);
+      } catch (fallbackError) {
+        console.error('Fallback color method also failed:', fallbackError);
+      }
+    }
     
-    console.log(`Updated commander role gradient - Primary: #${primaryColor.toString(16).padStart(6, '0')}, Secondary: #${secondaryColor.toString(16).padStart(6, '0')}`);
   } catch (error) {
-    console.error('Error updating role gradient:', error);
+    console.error('Error updating role:', error);
   }
 }
 
