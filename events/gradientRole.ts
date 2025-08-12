@@ -6,6 +6,10 @@ import {
   ColorResolvable
 } from 'discord.js';
 import idclass from '../utils/idclass';
+import { config } from 'dotenv';
+config();
+
+const isTest = process.env.isTest === 'true';
 
 // Function to generate random colors
 function generateRandomColor(): ColorResolvable {
@@ -108,6 +112,12 @@ export default {
   name: Events.ClientReady,
   once: true,
   async execute(client: Client) {
+    // Skip execution if in test mode
+    if (isTest) {
+      console.log('[GradientRole] Skipping gradient role setup in test environment');
+      return;
+    }
+
     // Start the gradient role color update interval
     startGradientInterval(client);
   }

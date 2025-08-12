@@ -175,6 +175,10 @@ roleSun() {
   VCTotal() {
     return isTest ? "1362447889615425566" : "1362447649206435911";
   }
+
+  channelSourceStatus() {
+    return isTest ? "1375849069372641470" : "1404804459137204254";
+  }
 }
 
 // role/channelNAME() {
