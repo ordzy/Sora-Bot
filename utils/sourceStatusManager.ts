@@ -1,4 +1,4 @@
-import { TextChannel } from 'discord.js';
+import { TextChannel, Message } from 'discord.js';
 import idclass from './idclass';
 import fetch from 'node-fetch';
 
@@ -38,6 +38,9 @@ interface APIModule {
 export const sourceStatusData: SourceStatusData = {};
 const API_URL = 'https://library.cufiy.net/api/modules.min.json'; // Update this to your actual API endpoint
 
+// Store message references for editing
+let statusMessages: Message[] = [];
+
 // Function to fetch modules from API
 export async function fetchModules(): Promise<string[]> {
   try {
@@ -55,7 +58,9 @@ export async function fetchModules(): Promise<string[]> {
 }
 
 // Function to initialize new modules as "up"
-export function initializeNewModules(moduleNames: string[]): void {
+export function initializeNewModules(moduleNames: string[]): string[] {
+  const newModules: string[] = [];
+  
   moduleNames.forEach(name => {
     if (!sourceStatusData[name]) {
       sourceStatusData[name] = {
@@ -63,8 +68,11 @@ export function initializeNewModules(moduleNames: string[]): void {
         status: 'up',
         lastUpdated: Date.now()
       };
+      newModules.push(name);
     }
   });
+  
+  return newModules;
 }
 
 // Function to create status text
@@ -83,13 +91,13 @@ export function createStatusText(modules: SourceModule[]): string {
 }
 
 // Function to split messages if they exceed Discord's limit
-export async function splitMessages(modules: SourceModule[], channel: TextChannel): Promise<void> {
+export async function splitMessages(modules: SourceModule[], channel: TextChannel): Promise<Message[]> {
   const MAX_MESSAGE_LENGTH = 1900; // Leave some buffer for safety
+  const messages: Message[] = [];
   
   // Send the first message with header
-  let currentMessage = '**Source Module Status**\n\n';
+  let currentMessage = '**Modules Status**\n\n';
   let currentLength = currentMessage.length;
-  let messageNumber = 1;
   
   for (let i = 0; i < modules.length; i++) {
     const module = modules[i];
@@ -98,12 +106,12 @@ export async function splitMessages(modules: SourceModule[], channel: TextChanne
     // Check if adding this module would exceed the limit
     if (currentLength + moduleText.length > MAX_MESSAGE_LENGTH) {
       // Send current message
-      await channel.send(currentMessage);
+      const sentMessage = await channel.send(currentMessage);
+      messages.push(sentMessage);
       
       // Start new message (without header for subsequent messages)
       currentMessage = '';
       currentLength = 0;
-      messageNumber++;
     }
     
     // Add module to current message
@@ -113,7 +121,56 @@ export async function splitMessages(modules: SourceModule[], channel: TextChanne
   
   // Send the last message if it has content
   if (currentMessage.trim().length > 0) {
-    await channel.send(currentMessage);
+    const sentMessage = await channel.send(currentMessage);
+    messages.push(sentMessage);
+  }
+  
+  return messages;
+}
+
+// Function to add new modules to existing messages
+export async function addNewModulesToMessages(client: any, newModules: string[]): Promise<void> {
+  try {
+    const channel = await client.channels.fetch(idclass.channelSourceStatus());
+    if (!channel || !(channel instanceof TextChannel)) {
+      console.error('Source status channel not found');
+      return;
+    }
+    
+    // Convert to array and sort by name
+    const modulesArray = Object.values(sourceStatusData).sort((a, b) => a.name.localeCompare(b.name));
+    
+    // If we have existing messages, try to edit the last one
+    if (statusMessages.length > 0) {
+      const lastMessage = statusMessages[statusMessages.length - 1];
+      const newText = createStatusText(modulesArray);
+      
+      // Check if the new text fits in one message
+      if (newText.length <= 1900) {
+        // Edit the last message with the complete updated list
+        await lastMessage.edit(newText);
+        console.log('Updated existing message with new modules');
+      } else {
+        // If it's too long, delete old messages and create new ones
+        try {
+          await Promise.all(statusMessages.map(msg => msg.delete().catch(() => {})));
+        } catch (error) {
+          console.warn('Failed to delete old status messages:', error);
+        }
+        
+        // Create new messages
+        statusMessages = await splitMessages(modulesArray, channel);
+        console.log('Created new messages due to length limit');
+      }
+    } else {
+      // No existing messages, create new ones
+      statusMessages = await splitMessages(modulesArray, channel);
+      console.log('Created initial status messages');
+    }
+    
+    console.log(`Added ${newModules.length} new modules to status list`);
+  } catch (error) {
+    console.error('Error adding new modules to messages:', error);
   }
 }
 
@@ -121,28 +178,15 @@ export async function splitMessages(modules: SourceModule[], channel: TextChanne
 export async function updateSourceStatus(client: any): Promise<void> {
   try {
     const moduleNames = await fetchModules();
-    initializeNewModules(moduleNames);
+    const newModules = initializeNewModules(moduleNames);
     
-    const channel = await client.channels.fetch(idclass.channelSourceStatus());
-    if (!channel || !(channel instanceof TextChannel)) {
-      console.error('Source status channel not found');
-      return;
+    // Only update if there are new modules
+    if (newModules.length > 0) {
+      console.log(`Found ${newModules.length} new modules: ${newModules.join(', ')}`);
+      await addNewModulesToMessages(client, newModules);
+    } else {
+      console.log('No new modules found, skipping status update');
     }
-    
-    // Clear previous messages (optional - you can remove this if you want to keep history)
-    const messages = await channel.messages.fetch({ limit: 50 });
-    const botMessages = messages.filter(msg => msg.author.id === client.user?.id);
-    if (botMessages.size > 0) {
-      await channel.bulkDelete(botMessages);
-    }
-    
-    // Convert to array and sort by name
-    const modulesArray = Object.values(sourceStatusData).sort((a, b) => a.name.localeCompare(b.name));
-    
-    // Split and send messages if needed
-    await splitMessages(modulesArray, channel);
-    
-    console.log(`Updated source status for ${modulesArray.length} modules`);
   } catch (error) {
     console.error('Error updating source status:', error);
   }
@@ -162,4 +206,57 @@ export function updateModuleStatus(moduleName: string, status: 'up' | 'down', me
     return true;
   }
   return false;
+}
+
+// Function to edit status messages when status changes (no resending)
+export async function editStatusInPlace(client: any, changedModule: string): Promise<void> {
+  try {
+    const channel = await client.channels.fetch(idclass.channelSourceStatus());
+    if (!channel || !(channel instanceof TextChannel)) {
+      console.error('Source status channel not found');
+      return;
+    }
+    
+    // Convert to array and sort by name
+    const modulesArray = Object.values(sourceStatusData).sort((a, b) => a.name.localeCompare(b.name));
+    
+    // If we have existing messages, try to edit them in place
+    if (statusMessages.length > 0) {
+      const newText = createStatusText(modulesArray);
+      
+      // Check if the new text fits in one message
+      if (newText.length <= 1900) {
+        // Edit the first message with the complete updated list
+        await statusMessages[0].edit(newText);
+        
+        // Delete additional messages if they exist
+        if (statusMessages.length > 1) {
+          for (let i = 1; i < statusMessages.length; i++) {
+            try {
+              await statusMessages[i].delete();
+            } catch (error) {
+              console.warn('Failed to delete additional message:', error);
+            }
+          }
+          statusMessages = [statusMessages[0]];
+        }
+        
+        console.log(`Updated status for ${changedModule} in existing message`);
+      } else {
+        // If it's too long, we need to split into multiple messages
+        // Delete old messages and create new ones
+        try {
+          await Promise.all(statusMessages.map(msg => msg.delete().catch(() => {})));
+        } catch (error) {
+          console.warn('Failed to delete old status messages:', error);
+        }
+        
+        // Create new messages
+        statusMessages = await splitMessages(modulesArray, channel);
+        console.log(`Updated status for ${changedModule} with new split messages`);
+      }
+    }
+  } catch (error) {
+    console.error('Error editing status in place:', error);
+  }
 } 

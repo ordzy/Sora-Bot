@@ -5,7 +5,7 @@ import {
   GuildMember
 } from 'discord.js';
 import idclass from '../utils/idclass';
-import { getSortedModules, updateModuleStatus, updateSourceStatus } from '../utils/sourceStatusManager';
+import { getSortedModules, updateModuleStatus, editStatusInPlace } from '../utils/sourceStatusManager';
 
 export default {
   data: new SlashCommandBuilder()
@@ -77,6 +77,8 @@ export default {
       await interaction.reply({ content: 'Refreshing source status...', ephemeral: true });
       
       try {
+        // Import updateSourceStatus here to avoid circular dependency
+        const { updateSourceStatus } = await import('../utils/sourceStatusManager');
         await updateSourceStatus(interaction.client);
         await interaction.editReply('✅ Source status refreshed successfully!');
       } catch (error) {
@@ -145,9 +147,9 @@ export default {
 
     await interaction.reply({ embeds: [embed] });
 
-    // Trigger a refresh of the status display
+    // Edit the status messages in place to reflect the change
     try {
-      await updateSourceStatus(interaction.client);
+      await editStatusInPlace(interaction.client, targetModule.name);
       console.log(`Source ${targetModule.name} marked as ${newStatus}${message ? ` with message: ${message}` : ''}`);
     } catch (error) {
       console.error('Error updating source status display:', error);
