@@ -16,7 +16,7 @@ const data = new SlashCommandBuilder()
   .setDescription('Modifies the ordzy role’s color, icon, and optionally name.')
   .addStringOption(option =>
     option.setName('hex')
-      .setDescription('Hex color (e.g. #1a0beb)')
+      .setDescription('Hex color (e.g. #1d0af5)')
       .setRequired(false)
   )
   .addAttachmentOption(option =>
@@ -31,7 +31,7 @@ const data = new SlashCommandBuilder()
   );
 
 async function execute(interaction: ChatInputCommandInteraction) {
-  const roleId = idclass.roleordzy();
+  const roleId = idclass.roleOrdzy();
   const member = interaction.member as GuildMember;
   const guild = interaction.guild;
   
