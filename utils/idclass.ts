@@ -79,6 +79,14 @@ class IDClass {
     return isTest ? "1355635957482655810" : "1293635318834003978";
   }
 
+  roleOrdzy() {
+    return  "1407519464789901343";
+  }
+
+  roleOrdzy() {
+    return  "1407448764435665020";
+  }
+
   rolePaul() {
     return isTest ? "1355635957532983316" : "1346527970801618974";
   }
