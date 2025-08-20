@@ -109,7 +109,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     console.error('Error updating ordzy role:', error);
     await interaction.reply({
-      content: 'Something went wrong while updating the IBHR role. Please try again or check the image format/size.',
+      content: 'Something went wrong while updating the ordzy role. Please try again or check the image format/size.',
       ephemeral: true,
     });
   }
