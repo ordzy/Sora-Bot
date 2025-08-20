@@ -16,7 +16,7 @@ const data = new SlashCommandBuilder()
   .setDescription('Modifies the ordzy role’s color, icon, and optionally name.')
   .addStringOption(option =>
     option.setName('hex')
-      .setDescription('Hex color (e.g. #19059e)')
+      .setDescription('Hex color (e.g. #1a0beb)')
       .setRequired(false)
   )
   .addAttachmentOption(option =>
