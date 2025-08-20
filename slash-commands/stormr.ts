@@ -31,7 +31,7 @@ const data = new SlashCommandBuilder()
   );
 
 async function execute(interaction: ChatInputCommandInteraction) {
-  const roleId = idclass.rolestorm();
+  const roleId = idclass.roleStorm();
   const member = interaction.member as GuildMember;
   const guild = interaction.guild;
   
