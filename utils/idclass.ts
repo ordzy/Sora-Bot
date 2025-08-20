@@ -83,7 +83,7 @@ class IDClass {
     return  "1407519464789901343";
   }
 
-  roleOrdzy() {
+  roleStorm() {
     return  "1407448764435665020";
   }
 
