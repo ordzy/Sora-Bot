@@ -59,6 +59,15 @@ import {
                 'Invalid URL format provided: `' + link + '`'
       });
     }
+
+    const allKeys = await db.all();
+    const alreadyExists = allKeys.some(entry => entry.value?.link === link);
+
+    if (alreadyExists) {
+      return interaction.editReply({
+        content: `❌ This link has already been suggested:\n\`${link}\``
+      });
+    }
   
     const suggestionChannel = interaction.guild?.channels.cache.get(idclass.channelMRC());
     const publicChannel = interaction.guild?.channels.cache.get(idclass.channelMRC2());
