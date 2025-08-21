@@ -1,6 +1,5 @@
 import { Message, Client } from 'discord.js';
 import { ExtendedClient } from '../utils/ExtendedClient';
-import handleAutoReply from '../events/auto-reply';
 
 
 const prefixes = ['?', '.'];
@@ -10,7 +9,6 @@ export default {
   once: false,
   async execute(message: Message, client: ExtendedClient) {
 
-    handleAutoReply(message);
 
     const prefix = prefixes.find(p => message.content.startsWith(p));
     if (!prefix) return;

@@ -43,6 +43,20 @@ class IDClass {
   ];
 }
 
+  roleMods2() {
+  return [
+    this.roleDev(),
+    this.roleCommander(),
+    this.rolePaul(),
+    this.roleCranci(),
+    this.soraBotRole(),
+    this.roleContributor(),
+    this.roleDesigner(),
+    this.roleHelper(),
+    this.roleModuleCreator(),
+  ];
+}
+
   roleIMP() {
     return isTest
       ? ["1355635957482655808", "1355635957482655806", "1355635957482655807"]
@@ -63,6 +77,14 @@ class IDClass {
 
   roleIBH() {
     return isTest ? "1355635957482655810" : "1293635318834003978";
+  }
+
+  roleOrdzy() {
+    return  "1407519464789901343";
+  }
+
+  roleStorm() {
+    return  "1407448764435665020";
   }
 
   rolePaul() {
@@ -153,9 +175,17 @@ roleSun() {
   channelJLG() {
     return isTest ? "1362495682371387576" : "1362495755310334042";
   }
+
+  channelSupport() {
+    return isTest ? "1355635958795731078" : "1293432770198110250";
+  }
  
   VCTotal() {
     return isTest ? "1362447889615425566" : "1362447649206435911";
+  }
+
+  channelSourceStatus() {
+    return isTest ? "1375849069372641470" : "1404804459137204254";
   }
 }
 
