@@ -96,16 +96,16 @@ async function loadEvents(): Promise<void> {
 }
 
 async function registerSlashCommands(commands: Command[]): Promise<void> {
-    if (!process.env.LoginID || !process.env.CLIENT_ID) {
-        throw new Error('Missing CLIENT_ID or LoginID in .env!');
+    if (!process.env.LoginID) {
+        throw new Error('Missing LoginID in .env!');
     }
 
     const rest = new REST({ version: '10' }).setToken(process.env.LoginID);
-    
+
     try {
         console.log('Registering slash commands...');
         await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID),
+            Routes.applicationCommands(client.user!.id), // use detected bot ID
             { body: commands }
         );
         console.log('Successfully registered slash commands!');
@@ -124,11 +124,12 @@ async function init() {
         const slashCommands = await loadSlashCommands();
         await loadEvents();
         
-        // Register slash commands
+        // Login first, so client.user is available
+        await client.login(process.env.LoginID);
+
+        // Register slash commands using detected client ID
         await registerSlashCommands(slashCommands);
         
-        // Login
-        await client.login(process.env.LoginID);
         console.log('\nSora Bot is ready to serve!\n');
     } catch (error) {
         console.error('Fatal error during initialization:', error);
@@ -147,6 +148,3 @@ process.on('uncaughtException', (error) => {
 });
 
 init();
-
-
-
