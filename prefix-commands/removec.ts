@@ -4,7 +4,7 @@ import idclass from '../utils/idclass';
 export default {
   name: 'removec',
   description: 'Removes a user\'s access to the current channel.',
-  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
+  requiredRoles: idclass.roleMods(),
 
   async execute(message: Message, args: string[]) {
     const hasRequiredRole = message.member?.roles.cache.some(role =>

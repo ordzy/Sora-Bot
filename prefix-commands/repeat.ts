@@ -4,7 +4,7 @@ import idclass from '../utils/idclass';
 export default {
   name: 'cmd',
   description: 'Repeats a message.',
-  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
+  requiredRoles: idclass.roleMods(),
 
   execute(message: Message, args: string[], client: Client) {
     const requiredRoles = this.requiredRoles;

@@ -10,7 +10,7 @@ module.exports = {
      * @param {string[]} args
      */
     async execute(message: { member: { roles: { cache: any[]; }; }; reply: (arg0: { content?: string; allowedMentions?: { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; }; embeds?: any[]; }) => any; guild: { members: { fetch: (arg0: any) => any; }; name: any; channels: { cache: { get: (arg0: any) => any; }; }; }; channel: { send: (arg0: { content: string; allowedMentions: { parse: never[]; } | { parse: never[]; }; }) => any; }; author: { id: any; }; }, args: any[]) {
-        const requiredRoles = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
+        const requiredRoles = idclass.roleMods();
         const hasRequiredRole = message.member.roles.cache.some(role => requiredRoles.includes(role.id));
 
         if (!hasRequiredRole) {
@@ -39,10 +39,10 @@ module.exports = {
                 });
             }
 
-            if (user.roles.cache.has(idclass.roleDev())) {
+            if (user.roles.cache.has(idclass.roleMods())) {
                 const embed = new EmbedBuilder()
                     .setColor('#FFA500')
-                    .setDescription('You cannot kick peak devs <:DogHush:1331679185072029798>');
+                    .setDescription('You cannot kick peak mods. <:DogHush:1331679185072029798>');
                 return message.reply({ embeds: [embed] });
             }
 

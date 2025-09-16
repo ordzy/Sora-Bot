@@ -11,7 +11,7 @@ import {
     name: 'mute',
     description: 'Times out a user for a specified duration or removes the timeout if no duration is provided.',
     async execute(message: Message, args: string[]) {
-      const requiredRoles = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
+      const requiredRoles = idclass.roleMods();
       const hasRequiredRole = message.member?.roles.cache.some(role =>
         requiredRoles.includes(role.id)
       );
@@ -25,11 +25,11 @@ import {
         return message.reply('Please mention a user to timeout or untimeout.');
       }
   
-      const protectedRoles = [idclass.roleDev(), idclass.roleCranci(), idclass.rolePaul()];
+      const protectedRoles = [...idclass.roleMods(), ...idclass.roleMods2()];
       if (member.roles.cache.some(role => protectedRoles.includes(role.id))) {
         const embed = new EmbedBuilder()
           .setColor('#FFA500')
-          .setDescription('You cannot mute peak devs <:DogHush:1331679185072029798>');
+          .setDescription('You cannot mute peak mods <:DogHush:1331679185072029798>');
         return message.reply({ embeds: [embed] });
       }
   

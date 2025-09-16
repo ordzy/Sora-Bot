@@ -5,7 +5,7 @@ export default {
   name: Events.MessageCreate,
   async execute(message: Message) {
     const restrictedChannelId = idclass.channelMR();
-    const allowedRoles = [idclass.roleDev()];
+    const allowedRoles = idclass.roleMods();
 
     if (message.author.bot || message.channel.id !== restrictedChannelId) return;
 

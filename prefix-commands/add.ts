@@ -11,7 +11,7 @@ export default {
     name: 'add',
     description: 'Gives a user access to the current channel.',
     
-    requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
+    requiredRoles: idclass.roleMods(),
 
     async execute(message: Message, args: string[]) {
         if (!message.guild || !message.member) return;

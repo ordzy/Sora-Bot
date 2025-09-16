@@ -2,7 +2,7 @@ import { Message, Client, User } from 'discord.js';
 import idclass from '../utils/idclass';
 export default {
   name: 'botdm',
-  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
+  requiredRoles: idclass.roleMods(),
 
   execute(message: Message, args: string[], _client: Client) {
     const requiredRoles = this.requiredRoles;

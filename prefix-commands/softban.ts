@@ -6,12 +6,10 @@ import {
     EmbedBuilder
   } from 'discord.js';
   import idclass from '../utils/idclass';
-  
   export default {
     name: 'softban',
     description: 'Softbans a user (bans, deletes messages, DMs an invite, then unbans).',
-    requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
-  
+    requiredRoles: idclass.roleMods(),
     async execute(message: Message, args: string[], client: Client) {
       const hasRequiredRole = message.member?.roles.cache.some(role =>
         this.requiredRoles.includes(role.id)
@@ -32,7 +30,7 @@ import {
       }
   
       const reason = args.slice(1).join(' ') || 'No reason provided';
-      const inviteLink = 'https://discord.gg/sulfur'; // Replace with your server invite
+      const inviteLink = 'https://discord.gg/x7hppDWFDZ';
   
       try {
         const user = await message.guild?.members.fetch(userId).catch(() => null);
@@ -44,13 +42,14 @@ import {
 }
 
   
-        const devEmbed = new EmbedBuilder()
+        const DevEmbed = new EmbedBuilder()
           .setColor('#FFA500')
-          .setDescription('You cannot softban peak devs <:DogHush:1331679185072029798>');
-  
-        if (user.roles.cache.has(idclass.roleDev())) {
-          return message.reply({ embeds: [devEmbed] });
-        }
+          .setDescription('You cannot softban peak mods. <:DogHush:1331679185072029798>');
+
+        if (user.roles.cache.some(role => idclass.roleMods().includes(role.id))) {
+    return message.reply({ embeds: [DevEmbed] });
+}
+
   
         // DM user
         try {

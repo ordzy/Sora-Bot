@@ -9,7 +9,7 @@ import {
   export default {
     name: 'unban',
     description: 'Unbans a user from the server.',
-    requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
+    requiredRoles: idclass.roleMods(),
   
     async execute(message: Message, args: string[]) {
       const requiredRoles = this.requiredRoles;

@@ -55,7 +55,7 @@ export default {
 
   async execute(interaction: ChatInputCommandInteraction) {
     // Check permissions - only allow specific roles
-    const allowedRoleIDs = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
+    const allowedRoleIDs = [idclass.roleDev(), idclass.roleAdmin(), idclass.rolePaul(), idclass.roleCranci()];
     const member = interaction.member as GuildMember;
     
     if (!member) {

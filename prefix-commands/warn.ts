@@ -5,18 +5,14 @@ const roles = idclass
 export default {
   name: 'warn',
   description: 'Issues a warning to a user.',
-  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
+  requiredRoles: idclass.roleMods(),
   protectedRoles: [
-    roles.roleDev(),
-    roles.roleHelper(),
-    roles.roleIBH(),
-    roles.rolePaul(),
-    roles.roleContributor(),
-    roles.roleDesigner(),
-    roles.roleImportant(),
-    roles.roleCranci(),
-    roles.soraBotRole(),
-  ],
+    ...roles.roleMods(),
+    ...roles.roleMods2(),
+    ...roles.roleIBH(),
+    ...roles.roleImportant(),
+],
+
 
   async execute(message: Message, args: string[]) {
     const requiredRoles: string[] = this.requiredRoles;

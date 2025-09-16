@@ -3,7 +3,7 @@ import idclass from '../utils/idclass';
 export default {
   name: 'ban',
   description: 'Bans a user from the server.',
-  requiredRoles: [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()],
+  requiredRoles: idclass.roleMods(),
 
   async execute(message: Message, args: string[], client: Client) {
     const requiredRoles = this.requiredRoles;
@@ -47,7 +47,7 @@ export default {
         if (guildMember.roles.cache.some(role => idclass.roleMods().includes(role.id))) {
           const embed = new EmbedBuilder()
             .setColor('#FFA500')
-            .setDescription('You cannot ban peak devs <:DogHush:1331679185072029798>');
+            .setDescription('You cannot ban mods <:DogHush:1331679185072029798>');
           return message.reply({ embeds: [embed] });
         }
 

@@ -9,7 +9,7 @@ module.exports = {
      * @param {string[]} args
      */
     async execute(message: { member: { roles: { cache: any; }; }; reply: (arg0: { content: string; allowedMentions: { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; } | { parse: never[]; }; }) => any; guild: { members: { fetch: (arg0: any) => any; }; roles: { cache: { get: (arg0: any) => any; }; }; channels: { cache: { get: (arg0: string) => any; }; }; }; author: { id: any; }; }, args: string | any[]) {
-        const requiredRoles = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
+        const requiredRoles = idclass.roleMods();
         const memberRoles = message.member?.roles?.cache;
 
         if (!memberRoles || !memberRoles.some((role: { id: string; }) => requiredRoles.includes(role.id))) {
@@ -43,7 +43,7 @@ module.exports = {
 
         for (const roleId of roleIds) {
             const role = message.guild.roles.cache.get(roleId);
-            if (!role || role.id === idclass.roleDev()) {
+            if (!role || role.id === idclass.roleMods()) {
                 rejectedRoles.push(roleId);
             } else {
                 validRoles.push(role);

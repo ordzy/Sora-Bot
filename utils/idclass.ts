@@ -13,12 +13,20 @@ class IDClass {
     return isTest ? "1355635957482655807" : "1318540329070104576";
   }
 
+  roleIbra() {
+    return isTest ? "1355635957482655812" : "1414396297485484092";
+  }
+
   roleDev() {
     return isTest ? "1355635957482655812" : "1293431333686612008";
   }
 
   roleHelper() {
     return isTest ? "1355635957482655809" : "1315038293343342642";
+  }
+
+  roleTrusted() {
+    return isTest ? "1355635957482655809" : "1406012373071958109";
   }
 
   logChannel() {
@@ -35,8 +43,8 @@ class IDClass {
 
   roleMods() {
   return [
-    this.roleDev(),
-    this.roleCommander(),
+    this.roleIbra(),
+    this.roleAdmin(),
     this.rolePaul(),
     this.roleCranci(),
     this.soraBotRole()
@@ -46,7 +54,8 @@ class IDClass {
   roleMods2() {
   return [
     this.roleDev(),
-    this.roleCommander(),
+    this.roleIbra(),
+    this.roleAdmin(),
     this.rolePaul(),
     this.roleCranci(),
     this.soraBotRole(),
@@ -54,6 +63,7 @@ class IDClass {
     this.roleDesigner(),
     this.roleHelper(),
     this.roleModuleCreator(),
+    this.roleTrusted()
   ];
 }
 
@@ -91,8 +101,8 @@ class IDClass {
     return isTest ? "1355635957532983316" : "1346527970801618974";
   }
 
-  roleCommander() {
-    return isTest ? '1370495796029427915' : '1365771159676780667';
+  roleAdmin() {
+    return isTest ? '1370495796029427915' : '1357795830022803640';
   }
   
 

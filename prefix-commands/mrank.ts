@@ -45,12 +45,12 @@ export default {
   name: "mrank",
   description: "Modify a user's XP amount",
   async execute(message: Message, args: string[]) {
-    const commanderRoleID = idclass.roleCommander();
+    const AdminRoleID = idclass.roleAdmin();
     const authorMember = message.member;
 
-    if (!authorMember?.roles.cache.has(commanderRoleID)) {
+    if (!authorMember?.roles.cache.has(AdminRoleID)) {
       return message.reply({
-        content: "❌ You need the **Commander** role to use this command.",
+        content: "You need the **Admin** role to use this command.",
         allowedMentions: { repliedUser: false },
       });
     }

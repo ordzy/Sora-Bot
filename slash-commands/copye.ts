@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import idclass from '../utils/idclass';
 
-const Mods = [idclass.roleDev(), idclass.roleCommander(), idclass.rolePaul(), idclass.roleCranci()];
+const Mods = idclass.roleMods();
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -189,7 +189,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (logChannel) {
       for (const chunk of logs) {
         await logChannel.send({
-          content: `**Emoji has been** __COPIED__ **by <@${interaction.user.id}>**\n${chunk}`,
+          content: `**Emoji has been** __**COPIED**__ **by <@${interaction.user.id}>**\n${chunk}`,
           allowedMentions: { parse: [] }
         });
       }
