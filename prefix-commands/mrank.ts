@@ -45,12 +45,10 @@ export default {
   name: "mrank",
   description: "Modify a user's XP amount",
   async execute(message: Message, args: string[]) {
-    const AdminRoleID = idclass.roleAdmin();
-    const authorMember = message.member;
-
-    if (!authorMember?.roles.cache.has(AdminRoleID)) {
+    const ownerId = idclass.ownershipID();
+    if (message.author.id !== ownerId) {
       return message.reply({
-        content: "You need the **Admin** role to use this command.",
+        content: "Only the **Bot Owner** can use this command.",
         allowedMentions: { repliedUser: false },
       });
     }
