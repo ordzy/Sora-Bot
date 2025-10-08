@@ -11,46 +11,29 @@ export default {
   data: new SlashCommandBuilder()
     .setName('sourcestatus')
     .setDescription('Manage source module statuses')
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('up')
-        .setDescription('Mark a source as UP')
-        .addIntegerOption(option =>
-          option
-            .setName('number')
-            .setDescription('The number of the source from the status list')
-            .setRequired(true)
-            .setMinValue(1)
+    .addStringOption(option =>
+      option
+        .setName('action')
+        .setDescription('What to do')
+        .addChoices(
+          { name: 'Up', value: 'up' },
+          { name: 'Down', value: 'down' },
+          { name: 'Refresh', value: 'refresh' }
         )
-        .addStringOption(option =>
-          option
-            .setName('message')
-            .setDescription('Optional message to add')
-            .setRequired(false)
-        )
+        .setRequired(true)
     )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('down')
-        .setDescription('Mark a source as DOWN')
-        .addIntegerOption(option =>
-          option
-            .setName('number')
-            .setDescription('The number of the source from the status list')
-            .setRequired(true)
-            .setMinValue(1)
-        )
-        .addStringOption(option =>
-          option
-            .setName('message')
-            .setDescription('Optional message to add')
-            .setRequired(false)
-        )
+    .addIntegerOption(option =>
+      option
+        .setName('number')
+        .setDescription('The number of the source from the status list (for up/down)')
+        .setMinValue(1)
+        .setRequired(false)
     )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName('refresh')
-        .setDescription('Refresh the source status list')
+    .addStringOption(option =>
+      option
+        .setName('message')
+        .setDescription('Optional message to add (for up/down)')
+        .setRequired(false)
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
@@ -70,9 +53,9 @@ export default {
       });
     }
 
-    const subcommand = interaction.options.getSubcommand();
+    const action = interaction.options.getString('action', true);
 
-    if (subcommand === 'refresh') {
+    if (action === 'refresh') {
       // Trigger a refresh of the source status
       await interaction.reply({ content: 'Refreshing source status...', ephemeral: true });
       
@@ -80,16 +63,19 @@ export default {
         // Import updateSourceStatus here to avoid circular dependency
         const { updateSourceStatus } = await import('../utils/sourceStatusManager');
         await updateSourceStatus(interaction.client);
-        await interaction.editReply('✅ Source status refreshed successfully!');
+        await interaction.editReply('Source status refreshed successfully!');
       } catch (error) {
         console.error('Error refreshing source status:', error);
-        await interaction.editReply('❌ Error refreshing source status.');
+        await interaction.editReply('Error refreshing source status.');
       }
       return;
     }
 
-    const number = interaction.options.getInteger('number', true);
+    const number = interaction.options.getInteger('number');
     const message = interaction.options.getString('message') || undefined;
+    if (!number) {
+      return interaction.reply({ content: 'Please provide the source number when using action up/down.', ephemeral: true });
+    }
 
     // Get the sorted list of modules
     const modulesArray = getSortedModules();
@@ -117,7 +103,7 @@ export default {
     }
 
     // Update the status
-    const newStatus: 'up' | 'down' = subcommand === 'up' ? 'up' : 'down';
+    const newStatus: 'up' | 'down' = action === 'up' ? 'up' : 'down';
     const success = updateModuleStatus(targetModule.name, newStatus, message);
     
     if (!success) {

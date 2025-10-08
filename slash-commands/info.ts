@@ -149,7 +149,7 @@ export default {
             )
             .setColor('#ff9500')
             .setTimestamp()
-            .setFooter({ text: 'Use /help to see available commands' });
+            .setFooter({ text: 'Hope you like bot as much as we do!' });
 
         await interaction.editReply({ embeds: [mainEmbed] });
     },

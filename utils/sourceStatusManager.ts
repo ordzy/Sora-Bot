@@ -1,6 +1,7 @@
 import { TextChannel, Message } from 'discord.js';
 import idclass from './idclass';
 import fetch from 'node-fetch';
+import db from './db';
 
 export interface SourceModule {
   name: string;
@@ -36,6 +37,11 @@ interface APIModule {
 
 // Store source status data in memory (you can move this to database later)
 export const sourceStatusData: SourceStatusData = {};
+const DOWN_KEY = 'sourceStatus.down';
+
+interface PersistedDownMap {
+  [name: string]: { message?: string; lastUpdated?: number };
+}
 const API_URL = 'https://library.cufiy.net/api/modules.min.json'; // Update this to your actual API endpoint
 
 // Store message references for editing
@@ -57,16 +63,38 @@ export async function fetchModules(): Promise<string[]> {
   }
 }
 
+async function loadPersistedDownMap(): Promise<PersistedDownMap> {
+  try {
+    const data = await db.get(DOWN_KEY);
+    if (data && typeof data === 'object') {
+      return data as PersistedDownMap;
+    }
+  } catch (err) {
+    console.error('Failed to load persisted down map:', err);
+  }
+  return {};
+}
+
+async function savePersistedDownMap(map: PersistedDownMap): Promise<void> {
+  try {
+    await db.set(DOWN_KEY, map);
+  } catch (err) {
+    console.error('Failed to save persisted down map:', err);
+  }
+}
+
 // Function to initialize new modules as "up"
-export function initializeNewModules(moduleNames: string[]): string[] {
+export function initializeNewModules(moduleNames: string[], persistedDown: PersistedDownMap = {}): string[] {
   const newModules: string[] = [];
   
   moduleNames.forEach(name => {
     if (!sourceStatusData[name]) {
+      const persisted = persistedDown[name];
       sourceStatusData[name] = {
         name,
-        status: 'up',
-        lastUpdated: Date.now()
+        status: persisted ? 'down' : 'up',
+        message: persisted?.message,
+        lastUpdated: persisted?.lastUpdated ?? Date.now()
       };
       newModules.push(name);
     }
@@ -178,7 +206,8 @@ export async function addNewModulesToMessages(client: any, newModules: string[])
 export async function updateSourceStatus(client: any): Promise<void> {
   try {
     const moduleNames = await fetchModules();
-    const newModules = initializeNewModules(moduleNames);
+    const persistedDown = await loadPersistedDownMap();
+    const newModules = initializeNewModules(moduleNames, persistedDown);
     
     // Only update if there are new modules
     if (newModules.length > 0) {
@@ -203,9 +232,26 @@ export function updateModuleStatus(moduleName: string, status: 'up' | 'down', me
     sourceStatusData[moduleName].status = status;
     sourceStatusData[moduleName].message = message;
     sourceStatusData[moduleName].lastUpdated = Date.now();
+    // Persist down statuses so they survive restarts
+    persistModuleDownState(moduleName, status, message, sourceStatusData[moduleName].lastUpdated);
     return true;
   }
   return false;
+}
+
+async function persistModuleDownState(
+  moduleName: string,
+  status: 'up' | 'down',
+  message: string | undefined,
+  lastUpdated: number
+): Promise<void> {
+  const map = await loadPersistedDownMap();
+  if (status === 'down') {
+    map[moduleName] = { message, lastUpdated };
+  } else {
+    if (map[moduleName]) delete map[moduleName];
+  }
+  await savePersistedDownMap(map);
 }
 
 // Function to edit status messages when status changes (no resending)

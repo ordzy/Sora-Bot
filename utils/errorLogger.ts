@@ -72,6 +72,15 @@ console.error = (...args: any[]) => {
     });
 };
 
+// Suppress all warnings: hide console.warn entirely
+// This prevents warnings from cluttering logs and channels
+// Only errors will be logged and sent to the error channel
+console.warn = () => {};
+
+// Suppress Node.js process warnings as well
+// This prevents process.emitWarning/default handler output
+process.on('warning', () => {});
+
 // Export a convenient function for direct use
 export const logError = (error: Error | string, source?: string, additionalInfo?: Record<string, any>) => {
     return logErrorToChannel({ error, source, additionalInfo });
