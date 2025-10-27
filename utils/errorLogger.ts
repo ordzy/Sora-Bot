@@ -1,6 +1,6 @@
 import { TextChannel, DMChannel, NewsChannel } from 'discord.js';
 import idclass from './idclass';
-import { client } from '../sora';
+import { client } from '../luna';
 
 interface ErrorLogOptions {
     error: Error | string;

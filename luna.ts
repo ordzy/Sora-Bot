@@ -117,7 +117,7 @@ async function registerSlashCommands(commands: Command[]): Promise<void> {
 
 async function init() {
     try {
-        console.log('\nInitializing Sora Bot...\n');
+        console.log('\nInitializing Luna Bot...\n');
         
         // Load all commands and events
         await loadPrefixCommands();
@@ -130,7 +130,7 @@ async function init() {
         // Register slash commands using detected client ID
         await registerSlashCommands(slashCommands);
         
-        console.log('\nSora Bot is ready to serve!\n');
+        console.log('\nLuna Bot is ready to serve!\n');
     } catch (error) {
         console.error('Fatal error during initialization:', error);
         process.exit(1);

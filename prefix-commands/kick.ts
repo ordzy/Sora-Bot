@@ -41,7 +41,7 @@ module.exports = {
 
             if (user.roles.cache.has(idclass.roleMods())) {
                 const embed = new EmbedBuilder()
-                    .setColor('#FFA500')
+                    .setColor('#7E7E7E')
                     .setDescription('You cannot kick peak mods. <:DogHush:1331679185072029798>');
                 return message.reply({ embeds: [embed] });
             }

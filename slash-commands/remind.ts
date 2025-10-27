@@ -58,7 +58,7 @@ import {
       const embed = new EmbedBuilder()
         .setTitle("Reminder")
         .setDescription(reminder.message)
-        .setColor('#ff9500')
+        .setColor('#7E7E7E')
         .setFooter({ text: "Your reminder is here!" });
   
       await user.send({ embeds: [embed] });

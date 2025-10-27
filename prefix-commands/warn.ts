@@ -48,7 +48,7 @@ export default {
 
     if (hasProtectedRole) {
       const embed = new EmbedBuilder()
-        .setColor('#FFA500')
+        .setColor('#7E7E7E')
         .setDescription('You cannot warn trusted/mods <:DogHush:1331679185072029798>');
 
       return message.reply({

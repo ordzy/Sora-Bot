@@ -4,7 +4,7 @@ export default {
     name: Events.ClientReady,
     once: true,
     async execute(client: Client<true>) {
-        client.user.setActivity('Anime on Sora', {
+        client.user.setActivity('Anime on Luna', {
             type: ActivityType.Watching
         });
     }

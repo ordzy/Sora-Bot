@@ -1,6 +1,6 @@
-# Sora Bot
+# Luna Bot
 
-A powerful and modular Discord bot built with **TypeScript** for the Sora Modular App Server. Designed with scalability, performance, and user experience in mind.
+A powerful and modular Discord bot built with **TypeScript** for the Luna Modular App Server. Designed with scalability, performance, and user experience in mind.
 
 ## Features
 
@@ -37,8 +37,8 @@ A powerful and modular Discord bot built with **TypeScript** for the Sora Modula
 
 1. Fork and clone the repository:
 ```bash
-git clone https://github.com/your-username/Sora-Bot.git
-cd Sora-Bot
+git clone https://github.com/your-username/Luna-Bot.git
+cd Luna-Bot
 ```
 
 2. Install dependencies:
@@ -55,11 +55,11 @@ npm install
 ### For Windows Users:
 - Double-click `run.bat`
 OR
-- Run in terminal: `npx ts-node sora.ts`
+- Run in terminal: `npx ts-node luna.ts`
 
 ### For Linux/Mac Users:
 ```bash
-npx ts-node sora.ts
+npx ts-node luna.ts
 ```
 
 ## Contributing

@@ -53,7 +53,7 @@ export default {
       });
 
       const embed = new EmbedBuilder()
-        .setColor("#ff9500")
+        .setColor("#7E7E7E")
         .setTitle(`Welcome, ${member.user.username}`)
         .setDescription(
           `We're excited to have you here! Make sure to check out the following channels to get started and settle in.`

@@ -2,7 +2,7 @@
 
 :start
 echo Logging in Bot...
-npx ts-node sora.ts
+npx ts-node luna.ts
 
 echo.
 echo Bot has stopped.

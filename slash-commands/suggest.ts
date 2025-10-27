@@ -94,7 +94,7 @@ import {
       .setTitle(name)
       .setURL(link)
       .setDescription(`**Type:** ${type}\n**Language:** ${language}\n${link}`)
-      .setColor("#ff9500")
+      .setColor("#7E7E7E")
       .setThumbnail(faviconUrl)
       .addFields({ name: 'Status', value: 'Pending' });
   
@@ -112,7 +112,7 @@ import {
   
     const publicEmbed = new EmbedBuilder()
       .setTitle('New Module Submission')
-      .setColor("#ff9500")
+      .setColor("#7E7E7E")
       .addFields(
         { name: 'Module Name', value: name },
         { name: 'Module Type', value: type },

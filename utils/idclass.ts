@@ -47,7 +47,7 @@ class IDClass {
     this.roleAdmin(),
     this.rolePaul(),
     this.roleCranci(),
-    this.soraBotRole()
+    this.lunaBotRole()
   ];
 }
 
@@ -58,7 +58,7 @@ class IDClass {
     this.roleAdmin(),
     this.rolePaul(),
     this.roleCranci(),
-    this.soraBotRole(),
+    this.lunaBotRole(),
     this.roleContributor(),
     this.roleDesigner(),
     this.roleHelper(),
@@ -77,7 +77,7 @@ class IDClass {
     return isTest ? "1355635959860826350" : "1355245590589473042";
   }
 
-  soraBotRole() {
+  lunaBotRole() {
     return isTest ? "1355640963313172593" : "1367184950326988823";
   }
 

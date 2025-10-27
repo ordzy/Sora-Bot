@@ -43,7 +43,7 @@ import {
 
   
         const DevEmbed = new EmbedBuilder()
-          .setColor('#FFA500')
+          .setColor('#7E7E7E')
           .setDescription('You cannot softban peak mods. <:DogHush:1331679185072029798>');
 
         if (user.roles.cache.some(role => idclass.roleMods().includes(role.id))) {

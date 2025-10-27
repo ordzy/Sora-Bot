@@ -1,8 +1,8 @@
 {
-  "name": "sora",
+  "name": "luna",
   "version": "1.0.0",
   "description": "",
-  "main": "sora.ts",
+  "main": "luna.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,16 +10,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@napi-rs/canvas": "^0.1.70",
-    "better-sqlite3": "^11.9.1",
-    "discord.js": "^14.17.2",
-    "dotenv": "^16.4.7",
+    "@napi-rs/canvas": "^0.1.81",
+    "better-sqlite3": "^12.4.1",
+    "discord.js": "^14.24.0",
+    "dotenv": "^17.2.3",
     "node-fetch": "^3.3.2",
     "quick.db": "^9.1.7"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@types/node": "^24.9.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   }
 }

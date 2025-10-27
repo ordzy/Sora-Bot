@@ -28,7 +28,7 @@ import {
       const protectedRoles = [...idclass.roleMods(), ...idclass.roleMods2()];
       if (member.roles.cache.some(role => protectedRoles.includes(role.id))) {
         const embed = new EmbedBuilder()
-          .setColor('#FFA500')
+          .setColor('#7E7E7E')
           .setDescription('You cannot mute peak mods <:DogHush:1331679185072029798>');
         return message.reply({ embeds: [embed] });
       }
